@@ -2,7 +2,7 @@ import '../styles/style.css';
 import React from 'react';
 import { useEffect } from 'react';
 
-const Dashboard = () => {
+const PageDashboard = () => {
     useEffect(() => {
     document.title = 'C.S.E. - IRMÃ ADELAIDE | Dashboard';
     }, []);
@@ -14,4 +14,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default PageDashboard;
