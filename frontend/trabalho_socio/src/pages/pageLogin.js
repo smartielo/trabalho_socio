@@ -5,7 +5,7 @@ import Login from '../components/Login';
 
 const PageLogin = () => {
   useEffect(() => {
-      document.title = 'C.E.S. - Irmã Adelaide | Login';
+      document.title = 'C.S.E. - Irmã Adelaide | Login';
     }, []);
   return (
     <div>

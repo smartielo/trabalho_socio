@@ -5,7 +5,7 @@ import Login from '../components/Login';
 
 const PageFormulario = () => {
   useEffect(() => {
-      document.title = 'C.E.S. - Irmã Adelaide | Inscrição';
+      document.title = 'C.S.E. - Irmã Adelaide | Inscrição';
     }, []);
   return (
     <div>/

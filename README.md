@@ -2,17 +2,17 @@
 
 ## 📖 Sobre o Projeto
 
-Este projeto é uma iniciativa do projeto de extensão **"Fábrica de Software"** da UNISAGRADO - Bauru/SP. [cite\_start]O objetivo é desenvolver um sistema web para o **Centro Socioeducativo Irmã Adelaide**, visando otimizar e digitalizar o processo de inscrição e gestão dos participantes de seus projetos sociais. [cite: 1]
+Este projeto é uma iniciativa do projeto de extensão **"Fábrica de Software"** da UNISAGRADO - Bauru/SP. O objetivo é desenvolver um sistema web para o **Centro Socioeducativo Irmã Adelaide**, visando otimizar e digitalizar o processo de inscrição e gestão dos participantes de seus projetos sociais. 
 
-Atualmente, o processo de cadastro é feito manualmente através de fichas de papel. [cite\_start]A nova plataforma web irá substituir esse método, facilitando a gestão das informações, o acompanhamento das atividades e a geração de relatórios. [cite: 1]
+Atualmente, o processo de cadastro é feito manualmente através de fichas de papel. A nova plataforma web irá substituir esse método, facilitando a gestão das informações, o acompanhamento das atividades e a geração de relatórios. 
 
 ### O Cliente
 
-  * [cite\_start]**Instituição:** Centro Socioeducativo Irmã Adelaide [cite: 1]
-  * **Localização:** Av. [cite\_start]Santa Beatriz da Silva 7-40, Ferradura Mirim, Bauru – SP, Cep: 17031-365. [cite: 1]
-  * [cite\_start]**Contato:** Rafael [cite: 2]
-  * [cite\_start]**Telefones:** (14) 99715-8552 (Whatsapp) / (14) 3203-1993. [cite: 2]
-  * [cite\_start]**Redes Sociais:** [Instagram](https://www.instagram.com/projetos_sociaisiascj/) [cite: 3]
+  * **Instituição:** Centro Socioeducativo Irmã Adelaide 
+  * **Localização:** Av. Santa Beatriz da Silva 7-40, Ferradura Mirim, Bauru – SP, Cep: 17031-365. 
+  * **Contato:** Rafael 
+  * **Telefones:** (14) 99715-8552 (Whatsapp) / (14) 3203-1993. 
+  * **Redes Sociais:** [Instagram](https://www.instagram.com/projetos_sociaisiascj/)
 
 ## ✨ Funcionalidades Principais
 
@@ -30,7 +30,7 @@ Este projeto será construído utilizando as seguintes tecnologias (a serem defi
   * **Backend:**
   * **Banco de Dados:**
 
-[cite\_start]O sistema final deverá ser hospedado em um serviço de nuvem gratuito. [cite: 4]
+O sistema final deverá ser hospedado em um serviço de nuvem gratuito.
 
 ## 📂 Estrutura do Repositório
 
@@ -100,6 +100,10 @@ Este projeto está sendo desenvolvido pelos alunos do curso de [Nome do Curso] d
   * [Nome do Aluno 1]
   * [Nome do Aluno 2]
   * [Nome do Aluno 3]
+  * [Nome do Aluno 4]
+  * [Nome do Aluno 5]
+  * [Nome do Aluno 6]
+  * [Nome do Aluno 7]
   * ...
 
 ## 📄 Licença
