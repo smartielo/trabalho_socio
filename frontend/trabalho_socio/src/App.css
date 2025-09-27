@@ -28,6 +28,9 @@
   color: #61dafb;
 }
 
+.btn{background:#4b6cb7;color:#fff;border:none;padding:10px;border-radius:6px;cursor:pointer}
+.App-header button{margin-top:12px;padding:8px 12px;border-radius:6px;border:none;background:#61dafb;color:#0b1a2b}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
