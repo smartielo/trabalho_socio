@@ -1,0 +1,34 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+pnpm-lock.yaml
+
+# Build outputs
+build/
+dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# VSCode
+.vscode/
+
+# logs
+logs/
+*.log
+
+# Python caches
+__pycache__/
+*.pyc
+
+# Ignore .git directory of submodules if any
+*/.git
