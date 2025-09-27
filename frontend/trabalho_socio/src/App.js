@@ -15,7 +15,7 @@ function App() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Learn React GABRIIEL GABRIEL KKKKKKKKKKKKKKKKKK
+          Learn React GABRIIEL GABRIEL KKKKKKKKKKKKKKKKKK GABRIEL FURNALEOT
         </a>
       </header>
     </div>
