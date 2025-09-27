@@ -1,24 +1,26 @@
 import logo from './logo.svg';
 import './App.css';
+import Login from './pages/Login';
+import { BrowserRouter, Routes, Route, Form } from 'react-router-dom';
+import Home from './pages/Home';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React GABRIIEL GABRIEL akdniodknawjdbnljkawbdhjkawbdhjavbjhdvbajhdgvawjgdhvajvked
-        </a>
-      </header>
-    </div>
+    // O BrowserRouter é o componente que "liga" o roteamento na sua aplicação.
+    // Ele deve envolver toda a lógica de rotas.
+    <BrowserRouter>
+      {/* Aqui dentro você pode colocar componentes que aparecem em todas as páginas, como Header e Footer */}
+      
+      {/* O componente Routes funciona como um "switch". Ele olha a URL atual
+          e renderiza a primeira rota <Route> que corresponder. */}
+      <Routes>
+        {/* Cada <Route> é uma regra. */}
+        {/* path="/" define a URL. */}
+        {/* element={...} define qual componente será renderizado para essa URL. */}
+        <Route path="/" element={<Home />} />
+        <Route path="/form" element={<Form />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
