@@ -1,7 +1,6 @@
 import '../styles/Login.css';
 import React from 'react';
 import { useEffect } from 'react';
-import Login from '../components/Login';
 import { useState } from 'react';
 import '../styles/form.css';
 

@@ -1,7 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
-import PageLogin from './pages/pageLogin';
-import PageDashboard from './pages/Dashboard';
 import PageFormulario from './pages/Form';
 import NotFound from './pages/NotFound';
 
