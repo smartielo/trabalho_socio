@@ -1,42 +1,32 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import './Login.css';
+import Button from './Button'; // Importe o componente que você criou
+import brasao from '../assets/brasao.png'; // Importe a imagem do brasão 
+import instituto from '../assets/instituto.png';
+import sagrado from '../assets/Sagrado.png';
 
-export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
+function Login() {
+  const handleLoginClick = () => {
+    alert('Botão de Login clicado!');
+  };
 
-  function handleSubmit(e) {
-    e.preventDefault();
-    setError('');
-    // Simulação simples: aceitar qualquer usuário com senha >= 4
-    if (!email || password.length < 4) {
-      setError('Email ou senha inválidos (senha precisa ter ao menos 4 caracteres)');
-      return;
-    }
-    // Simular login e redirecionar
-    // Em app real: chamar API, guardar token, etc.
-    localStorage.setItem('mock_user', JSON.stringify({ email }));
-    navigate('/home');
-  }
+  const handleSignUpClick = () => {
+    alert('Botão de Cadastrar clicado!');
+  };
 
   return (
-    <div className="login-page">
-      <form className="login-card" onSubmit={handleSubmit}>
-        <h2>Entrar</h2>
-        {error && <div className="login-error">{error}</div>}
-        <label>
-          Email
-          <input type="email" value={email} onChange={e => setEmail(e.target.value)} required />
-        </label>
-        <label>
-          Senha
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)} required />
-        </label>
-        <button type="submit" className="btn">Entrar</button>
-      </form>
+    <div className="app-container">
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+        <img src={instituto} alt="Instituto das Apostolas" style={{ width: '250px' }} />
+        <img src={sagrado} alt="Sagrado Coração de Jesus" style={{ width: '210px' }} />
+      </div>
+      <img src={brasao} alt="Brasão da Instituição" style={{ width: '300px', marginBottom: '30px' }} />
+      <div style={{ display: 'flex', gap: '20px' }}>
+        <Button onClick={handleLoginClick}>Entrar</Button>
+        <Button onClick={handleSignUpClick}>Cadastrar</Button>
+      </div>
     </div>
   );
 }
+
+export default Login;
