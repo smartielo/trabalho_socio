@@ -1,0 +1,111 @@
+.form-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+fieldset {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 1rem;
+}
+
+legend {
+  padding: 0 0.5rem;
+  font-weight: bold;
+  color: #555;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.form-group-row {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.form-group-row .form-group {
+    flex: 1;
+}
+
+.form-group label {
+  font-weight: 500;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="email"],
+input[type="tel"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box; /* Importante para o padding não aumentar a largura */
+}
+
+input[type="radio"], input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+.family-member-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.family-member-row input {
+  flex: 1;
+}
+
+.family-member-row button,
+button[type="button"] {
+  padding: 8px 12px;
+  border: 1px solid #007bff;
+  background-color: #fff;
+  color: #007bff;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.family-member-row button:hover,
+button[type="button"]:hover {
+    background-color: #f0f8ff;
+}
+
+.submit-button {
+  padding: 12px 20px;
+  border: none;
+  background-color: #28a745;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.submit-button:hover {
+  background-color: #218838;
+}
