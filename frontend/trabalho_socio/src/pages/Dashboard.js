@@ -11,7 +11,7 @@ const PageDashboard = () => {
     <div>
       <h1>Dashboard</h1>
       <h2>Bem-vindo ao Dashboard!</h2>
-      <h2>CADÊ A NOTA ZÉ!</h2>
+      <h2></h2>
     </div>
   );
 };
