@@ -1,6 +1,7 @@
 import '../styles/style.css';
 import React from 'react';
 import { useEffect } from 'react';
+import '../styles/dashboard.css';
 
 const PageDashboard = () => {
     useEffect(() => {
@@ -10,6 +11,7 @@ const PageDashboard = () => {
     <div>
       <h1>Dashboard</h1>
       <h2>Bem-vindo ao Dashboard!</h2>
+      <h2>CADÊ A NOTA ZÉ!</h2>
     </div>
   );
 };
