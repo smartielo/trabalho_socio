@@ -1,18 +1,18 @@
 {
   "files": {
     "main.css": "/static/css/main.d372e762.css",
-    "main.js": "/static/js/main.30198631.js",
+    "main.js": "/static/js/main.18f64fe7.js",
     "static/js/453.82514c4e.chunk.js": "/static/js/453.82514c4e.chunk.js",
     "static/media/brasao.png": "/static/media/brasao.5cedcc0537f0e1612c9e.png",
     "static/media/Sagrado.png": "/static/media/Sagrado.466afddd5cc1f22525f2.png",
     "static/media/instituto.png": "/static/media/instituto.2b0a3ef5bf6e391008d8.png",
     "index.html": "/index.html",
     "main.d372e762.css.map": "/static/css/main.d372e762.css.map",
-    "main.30198631.js.map": "/static/js/main.30198631.js.map",
+    "main.18f64fe7.js.map": "/static/js/main.18f64fe7.js.map",
     "453.82514c4e.chunk.js.map": "/static/js/453.82514c4e.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.d372e762.css",
-    "static/js/main.30198631.js"
+    "static/js/main.18f64fe7.js"
   ]
 }
