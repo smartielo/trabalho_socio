@@ -111,3 +111,20 @@
 .custom-btn:active {
   transform: scale(0.97);
 }
+.login-link {
+  margin-top: 25px; /* Espaçamento acima do texto */
+  font-family: var(--font-primary);
+  font-size: 16px;
+  color: #ffffff; /* Cor para o texto "Já possui um cadastro?" */
+}
+
+.login-link a {
+  color: var(--brand-gold); /* Cor do link usando a variável da marca */
+  font-weight: 600; /* Deixa o link em negrito para dar destaque */
+  text-decoration: none; /* Remove o sublinhado padrão */
+  transition: text-decoration 0.2s ease-in-out;
+}
+
+.login-link a:hover {
+  text-decoration: underline; /* Adiciona sublinhado ao passar o mouse */
+}
