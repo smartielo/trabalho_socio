@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import '../styles/Dashboard.css';
+import '../styles/dashboard.css';
 
 // 1. IMPORTAR o Chart.js e os componentes de gráfico
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
