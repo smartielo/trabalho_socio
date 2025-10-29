@@ -1,103 +1,40 @@
-:root {
-  --brand-gold: #ddb70d;
-  --brand-gold-translucent: #ddb70dc9;
-  --hover-effect-color: rgba(179, 23, 23, 0.781);
-  --button-border-radius: 0.6em;
-  --font-primary: 'Montserrat', sans-serif;
-  --font-size-button: 17px;
+/* Container do formulário de login */
+.login-form-container {
+    background-color: transparent;
+    padding: 2rem 3rem;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    width: 100%;
+    max-width: 500px; /* Mais estreito que o de cadastro */
+    margin: 0 auto;
+    z-index: 1;
 }
 
-.app-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  position: relative; /* Necessário para posicionar os círculos */
-  /* Adicionando o gradiente diretamente ao container principal */
-  background-color: #1b263b; /* Cor de fallback */
-  background-image: linear-gradient(160deg, #1b263b 0%, #5c0017 100%);
-  overflow: hidden; /* Garante que os círculos não ultrapassem a tela */
+/* Botão de login com largura total */
+.login-button {
+    width: 100%;
+    margin-top: 1rem; /* Espaço acima do botão */
 }
 
-/* Círculo no canto superior esquerdo */
-.app-container::before {
-  content: '';
-  position: absolute;
-  width: 400px;
-  height: 400px;
-  background-color: rgba(221, 183, 13, 0.05); /* Usando a cor base de --brand-gold */
-  border-radius: 50%;
-  top: -150px;
-  left: -150px;
-  z-index: 0; /* Coloca o círculo atrás do conteúdo */
+/* Link para a página de cadastro */
+.signup-link {
+    margin-top: 25px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    color: #ffffff;
+    text-align: center;
 }
 
-/* Círculo no canto inferior direito */
-.app-container::after {
-  content: '';
-  position: absolute;
-  width: 500px;
-  height: 500px;
-  background-color: rgba(221, 183, 13, 0.04); /* Usando a cor base de --brand-gold */
-  border-radius: 50%;
-  bottom: -200px;
-  right: -200px;
-  z-index: 0; /* Coloca o círculo atrás do conteúdo */
+.signup-link a {
+    color: #FEBF00; /* Dourado */
+    font-weight: 600;
+    text-decoration: none;
+    transition: text-decoration 0.2s ease-in-out;
 }
 
-.custom-btn {
-  font-size: var(--font-size-button);
-  font-family: var(--font-primary);
-  padding: 1em 2.7em;
-  font-weight: 500;
-  background: var(--brand-gold-translucent);
-  color: white;
-  border: none;
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--button-border-radius);
-  cursor: pointer;
-}
-
-.gradient {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  left: 0;
-  top: 0;
-  border-radius: var(--button-border-radius);
-  margin-top: -0.25em;
-  background-image: linear-gradient(
-    rgba(0, 0, 0, 0),
-    rgba(0, 0, 0, 0),
-    rgba(0, 0, 0, 0.3)
-  );
-}
-
-.label {
-  position: relative;
-  top: -1px;
-}
-
-.transition {
-  transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
-  transition-duration: 500ms;
-  background-color: var(--hover-effect-color);
-  border-radius: 9999px;
-  width: 0;
-  height: 0;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.custom-btn:hover .transition {
-  width: 14em;
-  height: 14em;
-}
-
-.custom-btn:active {
-  transform: scale(0.97);
+.signup-link a:hover {
+    text-decoration: underline;
 }

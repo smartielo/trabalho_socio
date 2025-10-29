@@ -1,21 +1,23 @@
 import React, { useState } from 'react';
-import './Login.css';
+import { useNavigate } from 'react-router-dom';
+import '../styles/Home.css';
 import Button from './Button';
 import brasao from '../assets/brasao.png';
 import instituto from '../assets/instituto.png';
 import sagrado from '../assets/Sagrado.png';
 
 const Home = () => {
+  const navigate = useNavigate();
   // 1. Controlar o estado do menu (aberto/fechado)
   const [isMenuOpen, setMenuOpen] = useState(false);
 
   const handleSignUpClick = () => {
-    alert('Botão de Cadastrar clicado!');
+    navigate('/cadastro');
   };
 
   const handleLoginLinkClick = (e) => {
-    e.preventDefault(); // Impede o recarregamento da página
-    alert('Link "Entrar" clicado!');
+    e.preventDefault(); // Impede o comportamento padrão do link
+    navigate('/login'); // Navega para a página de login
   };
 
   return (

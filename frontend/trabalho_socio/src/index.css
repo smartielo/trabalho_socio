@@ -6,6 +6,7 @@ body {
   background-color: #1b263b; /* Cor de fallback */
   background-image: linear-gradient(160deg, #1b263b 0%, #5c0017 100%);
   min-height: 100vh; /* Garante que o gradiente cubra a tela toda */
+  overflow-x: hidden; /* Impede a rolagem horizontal em todo o site */
 
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',

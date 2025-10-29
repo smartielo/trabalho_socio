@@ -1,0 +1,321 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+/* --- ESTILOS GLOBAIS PARA .app-container (compartilhados entre Cadastro e Login) --- */
+/* Usamos .cadastro-page-active para garantir que esta regra só se aplique nas páginas de formulário */
+.cadastro-page-active .app-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative; /* Necessário para posicionar os círculos */
+  /* O background-image e background-color são definidos no body em index.css */
+  min-height: 100vh; /* Garante que o container ocupe pelo menos a tela inteira */
+  height: auto; /* Permite que o container cresça além da tela com o conteúdo */
+  justify-content: flex-start; /* Alinha o formulário no topo */
+  padding-top: 2rem; /* Adiciona um respiro no topo da página */
+}
+
+/* Círculo no canto superior esquerdo */
+.app-container::before {
+  content: '';
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background-color: rgba(221, 183, 13, 0.05); /* Usando a cor base de --brand-gold */
+  border-radius: 50%;
+  top: -150px;
+  left: -150px;
+  z-index: 0; /* Coloca o círculo atrás do conteúdo */
+}
+
+/* --- ESTILOS ESPECÍFICOS DO CADASTRO (já existentes) --- */
+
+.cadastro-title {
+  color: #fff;
+  margin-top: 0; /* Remove a margem superior para aproximar do topo do container */
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  margin-bottom: 1.5rem;
+}
+
+/* Indicador de Etapas */
+.step-indicator {
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  margin-bottom: 1.5rem;
+}
+
+.step-indicator p {
+  color: #FEBF00; /* Garante a cor dourada */
+  font-weight: bold;
+  margin: 0; /* Remove margens padrão do parágrafo */
+}
+
+.form-group {
+  margin-bottom: 1rem; /* Espaçamento entre os grupos de campos */
+}
+
+.form-group-row {
+  display: flex;
+  gap: 1rem; /* Espaçamento entre campos na mesma linha */
+  align-items: flex-end; /* Alinha os itens ao final, útil para labels e inputs */
+}
+.form-group-row .form-group { flex: 1; } /* Faz os campos ocuparem espaço igual */
+
+/* Modificador para campos menores dentro de uma linha */
+.form-group-small {
+  flex: 0 1 120px; /* Não cresce, pode encolher, base de 120px */
+  min-width: 80px;
+}
+
+.cadastro-label {
+  font-family: 'Inter', sans-serif;
+  color: #fff;
+  margin-bottom: 8px;
+  display: block;
+}
+/* Inputs */ 
+.input, select.input {
+  width: 100%; /* Garante que o input ocupe todo o espaço do seu container */
+  border-radius: 10px;
+  outline: 2px solid #FEBF00;
+  border: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: #e2e2e2;
+  outline-offset: 3px;
+  padding: 10px 1rem;
+  transition: 0.25s;  
+  box-sizing: border-box; /* Garante que padding não afete a largura total */
+  height: 45px; /* Altura padrão para consistência */
+}
+
+.input:focus {
+  outline-offset: 5px;
+  background-color: #fff
+}
+
+/* Estilo para o input com erro */
+.input.error {
+  outline-color: #ff4d4d; /* Vermelho para indicar erro */
+  background-color: #ffe0e0;
+}
+
+/* Mensagem de erro abaixo do input */
+.error-message {
+  color: #ffc2c2; /* Rosa claro para boa legibilidade no fundo escuro */
+  font-size: 0.875rem;
+  margin-top: 5px;
+}
+
+/* Estilo para os grupos de radio/checkbox horizontais */
+.radio-group-horizontal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: center;
+  height: 45px; /* Mesma altura dos inputs para alinhamento */
+}
+
+.radio-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.radio-item label {
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  margin-bottom: 0; /* Sobrescreve o margin-bottom do .cadastro-label */
+}
+
+.radio-item input[type="checkbox"],
+.radio-item input[type="radio"] {
+  cursor: pointer;
+  accent-color: #FEBF00; /* Cor de destaque dourada */
+  width: 1.15em; /* Aumenta um pouco o tamanho para melhor visibilidade */
+  height: 1.15em;
+}
+
+/* Estilo para grupos verticais de radio/checkbox */
+.radio-group-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Espaçamento entre os itens */
+}
+
+/* Divisor */
+.form-divider {
+  border: none;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.3);
+  margin: 2rem 0;
+}
+
+/* Título de Seção */
+.form-section-title {
+  color: #FEBF00; /* Cor de destaque */
+  font-family: 'Inter', sans-serif;
+  font-size: 1.1rem;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  border-left: 3px solid #FEBF00;
+  padding-left: 10px;
+}
+/* --- Estilos para Tabela de Membros Familiares --- */
+.family-members-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.family-members-header,
+.family-member-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.family-members-header {
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-weight: bold;
+  padding: 0 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.family-col-nome { flex: 3; } /* Ocupa mais espaço */
+.family-col-parentesco { flex: 2; }
+.family-col-idade { flex: 1; max-width: 80px; } /* Espaço menor e fixo */
+.family-col-action { width: 45px; } /* Espaço para o botão */
+
+.family-member-row .input {
+  margin: 0;
+}
+
+.remove-member-btn,
+.add-member-btn {
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+  font-weight: bold;
+}
+
+button.remove-member-btn {
+  background-color: #5c0017; /* Tom de vinho do fundo */
+  color: #FEBF00; /* Texto dourado */
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  font-size: 1.5rem;
+  padding: 0;
+  border: 2px solid #FEBF00; /* Borda dourada */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button.remove-member-btn:hover {
+  background-color: #7e0020; /* Tom de vinho mais claro para hover */
+  transform: scale(1.1);
+}
+
+button.add-member-btn {
+  background-color: #5c0017; /* Tom de vinho do fundo */
+  color: #FEBF00; /* Texto dourado */
+  padding: 10px 15px;
+  border-radius: 8px;
+  align-self: flex-start; /* Alinha o botão à esquerda */
+  margin-top: 1rem;
+  border: 2px solid #FEBF00; /* Borda dourada */
+}
+
+button.add-member-btn:hover {
+  background-color: #7e0020; /* Tom de vinho mais claro para hover */
+}
+
+/* --- Estilos para os Botões de Navegação e Submit --- */
+.navigation-buttons {
+  display: flex;
+  justify-content: flex-end; /* Alinha os botões à direita por padrão */
+  gap: 1rem; /* Adiciona um espaço entre os botões */
+  align-items: center; /* Alinha os botões verticalmente ao centro */
+  margin-top: 2rem;
+}
+
+/* Estilo base para todos os botões de ação do formulário */
+button.nav-button, button.submit-button {
+  padding: 12px 30px;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid #FEBF00;
+}
+
+button.prev-button {
+  background-color: transparent;
+  color: #FEBF00;
+  margin-right: auto; /* Empurra o botão "Voltar" para a esquerda */
+}
+
+button.prev-button:hover {
+  background-color: #FEBF00;
+  color: #5c0017;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+button.next-button {
+  background-color: #5c0017; /* Tom de vinho do fundo */
+  color: #FEBF00; /* Texto dourado */
+}
+
+button.next-button:hover {
+  background-color: #7e0020; /* Tom de vinho mais claro */
+  color: #fff; /* Texto branco para contraste */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+button.submit-button {
+  color: #FEBF00; /* Texto dourado */
+  background-color: #5c0017; /* Tom de vinho do fundo */  
+}
+
+button.submit-button:hover {
+  background-color: #7e0020; /* Tom de vinho mais claro */
+  color: #fff; /* Texto branco para contraste */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* --- Estilos para o Botão Voltar --- */
+.back-button-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 0; /* Remove o espaço extra acima do botão */
+  padding-bottom: 2rem; /* Adiciona um respiro na parte inferior da página */
+}
+
+.back-button {
+  padding: 10px 35px;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #fff; /* Texto branco */
+  background-color: transparent; /* Fundo transparente */
+  border: 2px solid #fff; /* Borda branca */
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  background-color: #fff; /* Fundo branco no hover */
+  color: #5c0017; /* Texto vinho no hover */
+  transform: translateY(-2px);
+}

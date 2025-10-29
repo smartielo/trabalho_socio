@@ -3,8 +3,8 @@ import Home from './pages/Home';
 import PageFormulario from './pages/Form';
 import NotFound from './pages/NotFound';
 import PageDashboard from './pages/Dashboard';
-import PageLogin from './pages/pageLogin';
-
+import Login from './pages/Login';
+import Cadastro from './pages/Cadastro';
 
 function App() {
   return (
@@ -14,7 +14,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/form" element={<PageFormulario />} />
         <Route path="/dashboard" element={<PageDashboard />} />
-        <Route path="/login" element={<PageLogin />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/cadastro" element={<Cadastro />} />
       </Routes>
     </BrowserRouter>
   );
