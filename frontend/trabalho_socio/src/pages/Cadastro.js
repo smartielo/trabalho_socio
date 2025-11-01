@@ -350,7 +350,7 @@ const Cadastro = () => {
             <div className="form-group">
               <label htmlFor="rg" className="cadastro-label">RG</label>
               <InputMask
-                mask="99.999.999-9" // Máscara para RG
+                mask="99.999.999-*" // Máscara para RG
                 maskChar={null} // Remove o preenchimento da máscara
                 id="rg"
                 name="rg"
