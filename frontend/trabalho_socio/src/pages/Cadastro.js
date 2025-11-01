@@ -868,9 +868,8 @@ const Cadastro = () => {
           <div className="form-group">
             <label htmlFor="dataCadastro" className="cadastro-label">Data do Cadastro</label>
             <input type="text" id="dataCadastro" name="dataCadastro" className="input" value={dataAtual} disabled />
-          </div>
-
-          </>)}
+          </div></>
+          )}
 
           {/* --- PASSO 4: CRIAR SENHA --- */}
           {currentStep === 4 && ( <>
@@ -889,7 +888,8 @@ const Cadastro = () => {
               <input type="password" id="confirmarSenha" name="confirmarSenha" className={`input ${errors.confirmarSenha ? 'error' : ''}`} placeholder="Confirme sua senha" value={formData.confirmarSenha} onChange={handleChange} />
               {errors.confirmarSenha && <p className="error-message">{errors.confirmarSenha}</p>}
             </div>
-          </>)}
+          </>
+          )}
 
 
           {/* --- Botões de Navegação --- */}

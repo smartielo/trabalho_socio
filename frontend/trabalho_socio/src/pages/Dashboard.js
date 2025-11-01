@@ -1,20 +1,20 @@
 import { Link } from 'react-router-dom';
 import '../styles/dashboard.css';
 
-// 1. IMPORTAR o Chart.js e os componentes de gráfico
-import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
-import { Doughnut, Bar } from 'react-chartjs-2';
+// 1. IMPORTAÇÕES DE GRÁFICOS COMENTADAS TEMPORARIAMENTE
+// import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
+// import { Doughnut, Bar } from 'react-chartjs-2';
 
-// 2. REGISTRAR os elementos necessários do Chart.js
-ChartJS.register(
-  ArcElement,
-  Tooltip,
-  Legend,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title
-);
+// 2. REGISTRO DO CHART.JS COMENTADO TEMPORARIAMENTE
+// ChartJS.register(
+//   ArcElement,
+//   Tooltip,
+//   Legend,
+//   CategoryScale,
+//   LinearScale,
+//   BarElement,
+//   Title
+// );
 
 // --- DADOS FICTÍCIOS (MOCK) ---
 const dashboardData = {
@@ -172,16 +172,16 @@ const PageDashboard = () => {
         {/* Gráfico de Faixa Etária */}
         <div className="dashboard-widget chart-widget">
           <h3>Participantes por Faixa Etária</h3>
-          <div className="chart-container">
-            <Doughnut data={doughnutData} />
+          <div className="chart-placeholder">
+            Gráfico desativado temporariamente.
           </div>
         </div>
 
         {/* Gráfico de Status Escolar */}
         <div className="dashboard-widget chart-widget">
           <h3>Status Escolar</h3>
-          <div className="chart-container">
-            <Bar data={barData} options={barOptions} />
+          <div className="chart-placeholder">
+            Gráfico desativado temporariamente.
           </div>
         </div>
       </div>
