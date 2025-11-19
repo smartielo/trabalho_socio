@@ -75,7 +75,7 @@ const PageFormulario = () => {
     const { name, value, type, checked } = e.target;
 
     if (type === 'checkbox') {
-      // Lógica para adicionar/remover itens de um array no estado
+      // Lógica para adicionar/remover itens de um array no estado.
       setFormData(prev => {
         const list = prev[name] ? [...prev[name]] : [];
         if (checked) {
