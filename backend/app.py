@@ -13,7 +13,7 @@ app.config['JWT_SECRET_KEY'] = '6a4b12c7d9e0f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)  # Tempo que a pessoa tem no nosso site antes de precisar logar de novo
 
 #Configurações do banco de dados
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///usuarios.db' #Mudar para o banco de dados que formos usar
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://user:senha@host:3306/socioeducativo_db' #Mudar para o banco de dados que formos usar, mudar o user, senha e host
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
@@ -22,7 +22,7 @@ bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 
 
-# 2. isso é preciso para que eu faça as operações no banco de dados, pra isso, tem que coolocar todas as colunas do banco de dados
+# 2. isso é preciso para que eu faça as operações no banco de dados, pra isso, tem que colocar todas as colunas do banco de dados
 class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
