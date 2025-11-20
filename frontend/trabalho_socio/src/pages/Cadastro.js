@@ -242,17 +242,33 @@ const Cadastro = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Valida a última etapa antes de submeter
     const isValid = validateStep(currentStep);
 
     if (isValid) {
-      const fullFormData = { ...formData, membrosFamiliares: familyMembers };
-      console.log("Dados do Formulário:", fullFormData);
-      alert("Cadastro enviado! Verifique o console para ver os dados.");
-      // Aqui você enviaria os dados para a API
+      const fullFormData = { ...formData, familyMembers };
+      
+      try {
+        // A URL deve corresponder à rota do seu backend para cadastro
+        const response = await fetch('http://localhost:5000/api/cadastro', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(fullFormData),
+        });
+
+        if (response.ok) {
+          alert('Cadastro realizado com sucesso!');
+          navigate('/login'); // Redireciona para a página de login após o sucesso
+        } else {
+          const errorData = await response.json();
+          alert(`Falha no cadastro: ${errorData.message || 'Erro desconhecido.'}`);
+        }
+      } catch (err) {
+        alert('Falha ao conectar com o servidor. Tente novamente mais tarde.');
+      }
     }
   };
 
