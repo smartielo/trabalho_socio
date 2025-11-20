@@ -35,7 +35,7 @@ class Usuario(db.Model):
     nome = db.Column(db.String(100)) 
 
     def to_dict(self):
-        return {'id': self.id, 'nome': self.nome, 'email': self.email}
+        return {'id': self.id, 'nome': self.nome, 'cpf': self.cpf}
     
 
 @app.route("/login", methods=['POST'])
@@ -58,15 +58,23 @@ def login():
 @app.route("/cadastro", methods=['POST'])
 def cadastro():
     dados = request.get_json()
+    email = dados.get('email')
+    cpf = dados.get('cpf')
+    senha = dados.get('senha')
+    
+    # Validação de Unicidade
+    if Usuario.query.filter_by(cpf=cpf).first():
+        return jsonify({"msg": "CPF já cadastrado."}), 409
+        
     novo_usuario = Usuario(
-        email=dados.get('email'),
-        cpf=dados.get('cpf'),
-
-        password_hash=bcrypt.generate_password_hash(dados.get('senha')).decode('utf-8'),
+        email=email,
+        cpf=cpf,
 
 
+        password_hash=bcrypt.generate_password_hash(senha).decode('utf-8'),
         nome=dados.get('nome')
     )
+
     db.session.add(novo_usuario)
     db.session.commit()
     return jsonify({"msg": "Usuário cadastrado com sucesso!"}), 201
@@ -80,37 +88,13 @@ def dashboard():
 
 
     # da pra alterar pra retornar dados específicos da instituição, pq isso nao é a mensagem que queremos mostrar, como o martielo fez o dashboard la
-    return jsonify({'mensagem': f'Bem-vindo ao dashboard, {usuario_atual}'})
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    return jsonify({
+        'mensagem': f'Bem-vindo ao dashboard, {usuario_atual.nome}!',
+        'dados_usuario': usuario_atual.to_dict(),
+    }), 200
 
 
 
 
 if __name__ == '__main__':
-    # Roda o servidor na porta padrão 5000
-    app.run(debug=True)
+    app.run(debug=True, port=5000)
