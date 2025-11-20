@@ -1,8 +1,9 @@
 // src/pages/Dashboard/Dashboard.js
 
-import React from 'react'; // Adicionei a importação do React
-import { Link } from 'react-router-dom';
-import '../styles/dashboard.css';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import '../styles/dashboard.css'; // Estilos específicos do dashboard
+import '../styles/cadastro.css'; // Importando para usar estilos de input e botão
 
 // 1. IMPORTAÇÕES DE GRÁFICOS REATIVADAS
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
@@ -59,19 +60,20 @@ const doughnutData = {
     {
       label: 'Origem',
       data: dashboardData.encaminhamentosData.values,
+      // NOVAS CORES VIBRANTES
       backgroundColor: [
-        'rgba(255, 99, 132, 0.7)',
-        'rgba(54, 162, 235, 0.7)',
-        'rgba(255, 206, 86, 0.7)',
-        'rgba(75, 192, 192, 0.7)',
-        'rgba(153, 102, 255, 0.7)',
+        'rgba(255, 140, 0, 0.8)',   // Laranja Vibrante
+        'rgba(255, 215, 0, 0.8)',   // Amarelo Dourado
+        'rgba(236, 64, 122, 0.8)',  // Rosa Vibrante
+        'rgba(30, 136, 229, 0.8)',  // Azul Elétrico
+        'rgba(0, 200, 83, 0.8)',    // Verde Brilhante
       ],
       borderColor: [
-        'rgba(255, 99, 132, 1)',
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 206, 86, 1)',
-        'rgba(75, 192, 192, 1)',
-        'rgba(153, 102, 255, 1)',
+        '#FF8C00',
+        '#FFD700',
+        '#EC407A',
+        '#1E88E5',
+        '#00C853',
       ],
       borderWidth: 1,
     },
@@ -85,8 +87,8 @@ const barData = {
     {
       label: 'Número de Participantes',
       data: dashboardData.publicoAlvoData.values,
-      backgroundColor: 'rgba(75, 192, 192, 0.7)',
-      borderColor: 'rgba(75, 192, 192, 1)',
+      backgroundColor: '#ffae00ff',
+      borderColor: '#ffa600ff',
       borderWidth: 1,
     },
   ],
@@ -95,19 +97,72 @@ const barData = {
 // Opções para o Gráfico de Barras
 const barOptions = {
   scales: {
-    y: {
-      beginAtZero: true
-    }
+    y: { beginAtZero: true, ticks: { color: '#fff' } }, // Cor dos textos do eixo Y
+    x: { ticks: { color: '#fff' } } // Cor dos textos do eixo X
   },
   plugins: {
     legend: {
-      display: false // Não precisa de legenda para uma barra só
+      display: false, // Não precisa de legenda para uma barra só
+      labels: { color: '#fff' } // Cor das legendas (se ativas)
     }
   }
 };
 
 
 const PageDashboard = () => {
+  const navigate = useNavigate();
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        navigate('/login'); // Se não houver token, redireciona para o login
+        return;
+      }
+
+      try {
+        // A URL deve corresponder à rota do seu backend para o dashboard
+        const response = await fetch('http://localhost:5000/api/dashboard', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` // Envia o token para autenticação
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setDashboardData(data); // Armazena os dados recebidos do backend
+        } else {
+          // Se o token for inválido ou expirado, o backend retornará um erro
+          setError('Sessão inválida ou expirada. Por favor, faça login novamente.');
+          localStorage.removeItem('token'); // Limpa o token inválido
+          navigate('/login');
+        }
+      } catch (err) {
+        setError('Falha ao carregar os dados do dashboard. Verifique a conexão com o servidor.');
+      } finally {
+        setLoading(false); // Finaliza o estado de carregamento
+      }
+    };
+
+    fetchDashboardData();
+  }, [navigate]);
+
+  // Enquanto os dados não chegam, pode-se exibir uma mensagem de carregamento
+  if (loading) {
+    return <div className="dashboard-container"><h1>Carregando dados do Dashboard...</h1></div>;
+  }
+
+  // Se houver um erro, exibe a mensagem de erro
+  if (error || !dashboardData) {
+    return <div className="dashboard-container"><h1>{error || 'Não foi possível carregar os dados.'}</h1></div>;
+  }
+
   const availableSlots = dashboardData.capacity - dashboardData.totalParticipants;
 
   return (
@@ -115,7 +170,7 @@ const PageDashboard = () => {
       
       <div className="dashboard-header">
         <h1>Dashboard Administrativo</h1>
-        <Link to="/cadastro" className="btn-primary">
+        <Link to="/cadastro" className="submit-button" style={{ textDecoration: 'none', textAlign: 'center' }}>
           + Nova Matrícula
         </Link>
       </div>
@@ -148,8 +203,8 @@ const PageDashboard = () => {
       {/* --- Widget de Busca --- */}
       <div className="search-widget">
         <h3>Buscar Participante</h3>
-        <input type="text" placeholder="Digite o nome ou CPF..." />
-        <button type="button">Buscar</button>
+        <input type="text" placeholder="Digite o nome ou CPF..." className="input" />
+        <button type="button" className="submit-button">Buscar</button>
       </div>
 
       {/* --- Listas de Ação --- */}
@@ -190,7 +245,7 @@ const PageDashboard = () => {
         <div className="dashboard-widget chart-widget">
           <h3>Origem dos Encaminhamentos</h3>
           <div className="chart-container">
-            <Doughnut data={doughnutData} />
+            <Doughnut data={doughnutData} options={{ plugins: { legend: { labels: { color: '#fff' } } } }} />
           </div>
         </div>
 

@@ -1,19 +1,22 @@
 .dashboard-container {
   max-width: 1200px;
   margin: 2rem auto;
-  padding: 0 2rem;
+  padding: 0 2rem 2rem; /* Adicionado padding inferior */
+  font-family: 'Inter', sans-serif; /* Garante a mesma fonte do cadastro */
 }
 
 .dashboard-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem; /* Aumenta a margem inferior */
 }
 
 .dashboard-header h1 {
   font-size: 2rem;
-  color: #f7f7f7;
+  color: #fff; /* Cor do título principal para branco */
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
 }
 
 .btn-primary {
@@ -39,21 +42,29 @@
 }
 
 .kpi-card {
-  background: #fff;
+  background-color: #5c0017; /* Fundo vinho, igual ao cadastro */
+  border: 2px solid #FEBF00; /* Borda dourada */
   padding: 1.5rem;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  border-left: 5px solid #007bff;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Sombra mais sutil */
+  color: #fff; /* Cor do texto padrão para branco */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(254, 191, 0, 0.2); /* Sombra dourada no hover */
 }
 
 .kpi-card h2 {
   font-size: 2.5rem;
   margin: 0;
+  color: #FEBF00; /* Números em dourado */
 }
 
 .kpi-card p {
   font-size: 1rem;
-  color: #555;
+  color: #e2e2e2; /* Texto secundário mais suave */
   margin: 5px 0 0;
 }
 
@@ -67,32 +78,34 @@
 
 /* --- Widget de Busca --- */
 .search-widget {
-  background: #fff;
+  background-color: #5c0017; /* Fundo vinho */
+  border: 2px solid #FEBF00; /* Borda dourada */
   padding: 1.5rem;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   margin-bottom: 2rem;
+  display: flex;
+  flex-direction: row; /* Garante o layout em linha */
+  align-items: center; /* Alinha os itens verticalmente ao centro */
+  gap: 1rem; /* Adiciona um espaço entre o título e a busca */
 }
 
 .search-widget h3 {
   margin-top: 0;
+  color: #fff;
+  margin-bottom: 0; /* Remove margem inferior do h3 */
+  flex-shrink: 0; /* Impede que o título encolha */
 }
 
-.search-widget input {
-  width: 70%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-right: 10px;
+.search-widget .input {
+  flex-grow: 1; /* Faz o input ocupar o espaço disponível */
 }
 
-.search-widget button {
-  padding: 10px 15px;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+/* Garante que o botão de busca tenha a mesma altura do input */
+.search-widget .submit-button {
+  height: 45px; /* Mesma altura definida para .input em cadastro.css */
+  flex-shrink: 0; /* Impede que o botão encolha */
+  box-sizing: border-box; /* Garante que a altura inclua padding e borda, alinhando-o perfeitamente */
 }
 
 /* --- Linha de Widgets (Listas e Gráficos) --- */
@@ -104,18 +117,21 @@
 }
 
 .dashboard-widget {
-  background: #fff;
+  background-color: #5c0017; /* Fundo vinho */
+  border: 2px solid #FEBF00; /* Borda dourada */
   padding: 1.5rem;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   flex: 1; /* Faz com que os widgets dividam o espaço */
   min-width: 300px; /* Largura mínima antes de quebrar a linha */
 }
 
 .dashboard-widget h3 {
   margin-top: 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid rgba(254, 191, 0, 0.3); /* Linha divisória dourada e sutil */
   padding-bottom: 10px;
+  color: #FEBF00; /* Títulos dos widgets em dourado */
+  font-family: 'Inter', sans-serif;
 }
 
 .list-widget ul {
@@ -128,8 +144,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 0;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 12px 5px; /* Aumenta o padding */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Divisor de item mais sutil */
 }
 
 .list-item:last-child {
@@ -137,17 +153,24 @@
 }
 
 .list-item strong {
-  color: #333;
+  color: #fff; /* Texto principal branco */
 }
 
 .list-item span {
-  color: #777;
+  color: #ccc; /* Texto secundário cinza claro */
   font-size: 0.9rem;
 }
 
 .list-item a {
   font-size: 0.9rem;
   font-weight: bold;
+  color: #FEBF00; /* Links em dourado */
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.list-item a:hover {
+  color: #fff;
 }
 
 .chart-placeholder {
@@ -168,7 +191,14 @@
 
 .chart-container {
   position: relative;
-  /* Controla o tamanho do gráfico */
-  max-height: 300px; 
-  margin: 0 auto;
+  height: 300px; /* Altura fixa para o container do gráfico */
+  margin: 1rem auto 0;
+  display: flex; /* Ativa o Flexbox */
+  justify-content: center; /* Centraliza horizontalmente */
+  align-items: center; /* Centraliza verticalmente */
+}
+
+/* Ajustes para texto dos gráficos em tema escuro */
+.chart-widget canvas {
+  color: #fff;
 }

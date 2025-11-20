@@ -292,6 +292,29 @@ button.submit-button:hover {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
+/* Estilo para links que devem se parecer com o submit-button */
+a.submit-button {
+  display: inline-block; /* Permite aplicar padding e outras propriedades de bloco */
+  padding: 12px 30px;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid #FEBF00;
+  text-decoration: none; /* Remove o sublinhado do link */
+  color: #FEBF00; /* Texto dourado */
+  background-color: #5c0017; /* Tom de vinho do fundo */
+}
+
+a.submit-button:hover {
+  background-color: #7e0020; /* Tom de vinho mais claro */
+  color: #fff; /* Texto branco para contraste */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
 /* --- Estilos para o Botão Voltar --- */
 .back-button-container {
   width: 100%;
