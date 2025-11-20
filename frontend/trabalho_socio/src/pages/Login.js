@@ -32,33 +32,28 @@ const Login = () => {
       return;
     }
 
-    // --- PONTO DE INTEGRAÇÃO COM O BACKEND ---
-    // Aqui você fará a chamada para a sua API de login
-    console.log('Tentativa de login com:', { cpf, senha });
-    alert('Funcionalidade de login ainda não conectada ao backend.');
-
-    /*
     try {
+      // A URL deve corresponder à rota do seu backend para login
       const response = await fetch('http://localhost:5000/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cpf, senha }),
       });
 
-      const data = await response.json();
-
       if (response.ok) {
+        const data = await response.json();
         // Sucesso! Armazene o token e redirecione
         localStorage.setItem('token', data.token);
         navigate('/dashboard');
       } else {
+        // Tenta ler a mensagem de erro do backend
+        const data = await response.json();
         // Falha no login
         setError(data.message || 'CPF ou senha inválidos.');
       }
     } catch (err) {
       setError('Falha ao conectar com o servidor. Tente novamente.');
     }
-    */
   };
 
   return (
