@@ -38,7 +38,7 @@ class Usuario(db.Model):
         return {'id': self.id, 'nome': self.nome, 'cpf': self.cpf}
     
 
-@app.route("/login", methods=['POST'])
+@app.route("/api/login", methods=['POST'])
 def login():
     dados = request.get_json()
     cpf = dados.get('cpf')
@@ -55,7 +55,7 @@ def login():
     return jsonify({"msg": "Credenciais inválidas"}), 401
 
 
-@app.route("/cadastro", methods=['POST'])
+@app.route("/api/cadastro", methods=['POST'])
 def cadastro():
     dados = request.get_json()
     email = dados.get('email')
@@ -80,7 +80,7 @@ def cadastro():
     return jsonify({"msg": "Usuário cadastrado com sucesso!"}), 201
 
 
-@app.route("/dashboard", methods=['GET'])
+@app.route("/api/dashboard", methods=['GET'])
 @jwt_required()
 def dashboard():
     cpf_usuario_atual = get_jwt_identity()
