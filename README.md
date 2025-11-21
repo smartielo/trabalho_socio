@@ -26,9 +26,9 @@ Atualmente, o processo de cadastro é feito manualmente através de fichas de pa
 
 Este projeto será construído utilizando as seguintes tecnologias (a serem definidas):
 
-  * **Frontend:**
-  * **Backend:**
-  * **Banco de Dados:**
+  * **Frontend: React.JS
+  * **Backend: Python + Flask
+  * **Banco de Dados: SQL
 
 O sistema final deverá ser hospedado em um serviço de nuvem gratuito.
 
@@ -51,7 +51,6 @@ Siga os passos abaixo para configurar e executar o ambiente de desenvolvimento l
 
   * Node.js (versão LTS)
   * Git
-  * [Adicionar outros pré-requisitos, como Docker, etc.]
 
 ### Backend
 
@@ -95,16 +94,14 @@ Agradecemos o interesse em contribuir\! Siga os passos abaixo:
 
 ## 👨‍💻 Autores
 
-Este projeto está sendo desenvolvido pelos alunos do curso de [Nome do Curso] da UNISAGRADO, como parte do projeto de extensão "Fábrica de Software".
+Este projeto está sendo desenvolvido pelos alunos do curso de Ciências da Computação e Design da UNISAGRADO, como parte do projeto de extensão "Fábrica de Software".
 
-  * [Nome do Aluno 1]
-  * [Nome do Aluno 2]
-  * [Nome do Aluno 3]
-  * [Nome do Aluno 4]
-  * [Nome do Aluno 5]
-  * [Nome do Aluno 6]
-  * [Nome do Aluno 7]
-  * ...
+* Ana Nabeiro Junc
+* Eduardo Perfeito Euzébio
+* Emerson Mazzeto
+* Gabriel Furlaneto de Luiz
+* Gabriel Martielo da Silva
+* João Vitor de Paula Diniz
 
 ## 📄 Licença
 
