@@ -5,6 +5,7 @@ import Button from './Button';
 import brasao from '../assets/brasao.png';
 import instituto from '../assets/instituto.png';
 import sagrado from '../assets/Sagrado.png';
+import gif from '../assets/livro.gif'; // Substitua pelo seu GIF animado
 
 const Home = () => {
   const navigate = useNavigate();
@@ -18,6 +19,10 @@ const Home = () => {
   const handleLoginLinkClick = (e) => {
     e.preventDefault(); // Impede o comportamento padrão do link
     navigate('/login'); // Navega para a página de login
+  };
+
+  const handleCreditsClick = () => {
+    navigate('/creditos');
   };
 
   return (
@@ -52,6 +57,13 @@ const Home = () => {
           Já possui um cadastro? <a href="#" onClick={handleLoginLinkClick}>Entrar</a>
         </p>
       </div>
+
+      <button className="floating-credits-btn" onClick={handleCreditsClick}>
+        <span className="transition"></span>
+        <span className="gradient"></span>
+        <span className="label">Créditos</span>
+      </button>
+
     </div>
   );
 };

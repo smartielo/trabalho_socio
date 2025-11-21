@@ -265,3 +265,55 @@ body:not(.cadastro-page-active) .app-container {
   width: 220px; /* Largura fixa para alinhar */
   height: auto;
 }
+
+/* Botão Flutuante de Créditos */
+.floating-credits-btn {
+  /* Posicionamento fixo no canto */
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 20;
+
+  /* Estilo Visual (Cópia adaptada do .custom-btn) */
+  font-family: var(--font-primary);
+  font-weight: 500;
+  background: var(--brand-gold);
+  color: white;
+  border: none;
+  border-radius: var(--button-border-radius);
+  cursor: pointer;
+  
+  /* Essencial para a animação ficar contida no botão */
+  overflow: hidden; 
+  position: fixed; /* Reforçando */
+
+  /* Tamanho reduzido */
+  font-size: 14px; 
+  padding: 0.8em 1.5em; 
+  
+  /* Sombra inicial */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Movimento físico do botão ao passar o mouse */
+.floating-credits-btn:hover {
+  transform: scale(1.05) translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* --- AQUI ESTÁ A MÁGICA DA ANIMAÇÃO INTERNA --- */
+/* Isso faz o efeito vermelho (definido na classe .transition) expandir */
+.floating-credits-btn:hover .transition {
+  width: 14em;
+  height: 14em;
+}
+
+.floating-credits-btn:active {
+  transform: scale(0.95);
+}
+
+
+
+
+
