@@ -5,6 +5,7 @@ import NotFound from './pages/NotFound';
 import PageDashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Cadastro from './pages/Cadastro';
+import Creditos from './pages/Creditos';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/dashboard" element={<PageDashboard />} />
         <Route path="/login" element={<Login />} />
         <Route path="/cadastro" element={<Cadastro />} />
+        <Route path="/creditos" element={<Creditos />} />
       </Routes>
     </BrowserRouter>
   );
