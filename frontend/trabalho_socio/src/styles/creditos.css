@@ -58,10 +58,6 @@
 /* Área de Apoio */
 .support-box {
     margin-top: 2rem;
-    background-color: rgba(255, 255, 255, 0.05);
-    padding: 1rem;
-    border-radius: 8px;
-    border: 1px dashed #FEBF00;
 }
 
 .support-label {

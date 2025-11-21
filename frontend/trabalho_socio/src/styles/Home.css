@@ -1,7 +1,7 @@
 :root {
   --brand-gold: #ddb70d;
   --brand-gold-translucent: #ddb70dc9;
-  --hover-effect-color: rgba(179, 23, 23, 0.781);
+  --hover-effect-color: #881330f6; /* Tom de vinho do site */
   --button-border-radius: 0.6em;
   --font-primary: 'Montserrat', sans-serif;
   --font-size-button: 17px;
@@ -48,7 +48,7 @@ body:not(.cadastro-page-active) .app-container {
   font-family: var(--font-primary);
   padding: 1em 2.7em;
   font-weight: 500;
-  background: var(--brand-gold);
+  background: var(--brand-gold); /* Cor dourada, igual ao link "Entrar" */
   color: white;
   border: none;
   position: relative;
@@ -277,7 +277,7 @@ body:not(.cadastro-page-active) .app-container {
   /* Estilo Visual (Cópia adaptada do .custom-btn) */
   font-family: var(--font-primary);
   font-weight: 500;
-  background: var(--brand-gold);
+  background: #e91313; /* Rosa vibrante, como no gráfico */
   color: white;
   border: none;
   border-radius: var(--button-border-radius);
@@ -312,8 +312,3 @@ body:not(.cadastro-page-active) .app-container {
 .floating-credits-btn:active {
   transform: scale(0.95);
 }
-
-
-
-
-

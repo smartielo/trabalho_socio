@@ -83,6 +83,13 @@ const Login = () => {
         </form>
         <p className="signup-link">Não tem uma conta? <Link to="/cadastro">Cadastre-se</Link></p>
       </div>
+
+      {/* --- Botão Voltar (Fora do formulário) --- */}
+      <div className="back-button-container">
+        <button className="back-button" onClick={() => navigate('/')}>
+          Voltar
+        </button>
+      </div>
     </div>
   );
 };
