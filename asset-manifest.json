@@ -1,19 +1,20 @@
 {
   "files": {
-    "main.css": "/static/css/main.19924d48.css",
-    "main.js": "/static/js/main.06661169.js",
+    "main.css": "/static/css/main.003eac39.css",
+    "main.js": "/static/js/main.afcfe47e.js",
     "static/js/453.7845502b.chunk.js": "/static/js/453.7845502b.chunk.js",
+    "static/media/livro.gif": "/static/media/livro.0ba461ecabd1beca5244.gif",
     "static/media/brasao.png": "/static/media/brasao.5cedcc0537f0e1612c9e.png",
     "static/media/coordenadoria-de-extensao.jpg": "/static/media/coordenadoria-de-extensao.a03e8ab1b68e85ad8dc5.jpg",
     "static/media/Sagrado.png": "/static/media/Sagrado.466afddd5cc1f22525f2.png",
     "static/media/instituto.png": "/static/media/instituto.2b0a3ef5bf6e391008d8.png",
     "index.html": "/index.html",
-    "main.19924d48.css.map": "/static/css/main.19924d48.css.map",
-    "main.06661169.js.map": "/static/js/main.06661169.js.map",
+    "main.003eac39.css.map": "/static/css/main.003eac39.css.map",
+    "main.afcfe47e.js.map": "/static/js/main.afcfe47e.js.map",
     "453.7845502b.chunk.js.map": "/static/js/453.7845502b.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.19924d48.css",
-    "static/js/main.06661169.js"
+    "static/css/main.003eac39.css",
+    "static/js/main.afcfe47e.js"
   ]
 }
