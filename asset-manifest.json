@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.fbcae67a.css",
-    "main.js": "/static/js/main.1c6c2198.js",
+    "main.js": "/static/js/main.3239f20e.js",
     "static/js/453.7845502b.chunk.js": "/static/js/453.7845502b.chunk.js",
     "static/media/livro.gif": "/static/media/livro.0ba461ecabd1beca5244.gif",
     "static/media/brasao.png": "/static/media/brasao.5cedcc0537f0e1612c9e.png",
@@ -10,11 +10,11 @@
     "static/media/instituto.png": "/static/media/instituto.2b0a3ef5bf6e391008d8.png",
     "index.html": "/index.html",
     "main.fbcae67a.css.map": "/static/css/main.fbcae67a.css.map",
-    "main.1c6c2198.js.map": "/static/js/main.1c6c2198.js.map",
+    "main.3239f20e.js.map": "/static/js/main.3239f20e.js.map",
     "453.7845502b.chunk.js.map": "/static/js/453.7845502b.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.fbcae67a.css",
-    "static/js/main.1c6c2198.js"
+    "static/js/main.3239f20e.js"
   ]
 }
