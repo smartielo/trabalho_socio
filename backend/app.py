@@ -48,18 +48,92 @@ class Usuario(db.Model):
         return {'id': self.id, 'nome': self.nome, 'email': self.email, 'cpf': self.cpf}
 
 class Participante(db.Model):
-    __tablename__ = 'participantes'
+    class Participante(db.Model):
+        __tablename__ = 'participantes'
 
-    id = db.Column(db.Integer, primary_key=True)
-    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id', ondelete='SET NULL'))
+        id = db.Column(db.Integer, primary_key=True)
+        usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id', ondelete='SET NULL'))
+        status = db.Column(db.String(20), default='pendente') 
+
+    # ==========================================================================
+    # 1. IDENTIFICAÇÃO E LOCALIDADE
+    # ==========================================================================
+        nome_completo = db.Column(db.String(150), nullable=False)
+        cpf = db.Column(db.String(14), unique=True)
+        data_nascimento = db.Column(db.Date)
+        sexo = db.Column(db.Enum('Masculino', 'Feminino', 'Outro'))
+        nis = db.Column(db.String(20))
     
-    # Campo essencial para o Dashboard (Pendências)
-    status = db.Column(db.String(20), default='pendente') # pendente, ativo, arquivado
+        uf_naturalidade = db.Column(db.String(2))
+        naturalidade_cidade = db.Column(db.String(100))
+        endereco = db.Column(db.Text)
+    
+    # ==========================================================================
+    # 2. DOCUMENTOS
+    # ==========================================================================
+        rg = db.Column(db.String(20))
+        orgao_emissor = db.Column(db.String(20))
+        uf_rg = db.Column(db.String(2))
+        certidao_fls = db.Column(db.String(20))
+    
+    # ==========================================================================
+    # 3. RESPONSÁVEIS
+    # ==========================================================================
+        nome_responsavel = db.Column(db.String(150))
+        cpf_responsavel = db.Column(db.String(14))
+        nis_responsavel = db.Column(db.String(20))
+        rg_responsavel = db.Column(db.String(20))
+    
+    # ==========================================================================
+    # 4. DADOS ESCOLARES
+    # ==========================================================================
+        situacao_escolar = db.Column(db.Enum('frequenta', 'nao_frequenta'))
+        frequenta_eja = db.Column(db.Boolean)
+        serie = db.Column(db.String(20))
+        eja_semestre = db.Column(db.String(10))
+        nome_escola = db.Column(db.String(100))
+    
+    # ==========================================================================
+    # 5. ENCAMINHAMENTO E ENTIDADE
+    # ==========================================================================
+    # Nota: 'orgao_demandante' é uma lista, feita pela relação 'orgaos_demandantes' no final
+        orgao_demandante_outro = db.Column(db.String(100))
+        cras_referencia = db.Column(db.String(100))
+        tecnico_referencia = db.Column(db.String(100))
+        nome_entidade = db.Column(db.String(100))
+        endereco_entidade = db.Column(db.Text)
+        email_entidade = db.Column(db.String(120))
+        telefone_entidade = db.Column(db.String(20))
+        responsavel_preenchimento = db.Column(db.String(100))
 
-    # RELAÇÕES
-    familiares = db.relationship('Familiar', backref='participante', lazy=True)
-    beneficios = db.relationship('BeneficioParticipante', backref='participante', lazy=True) 
-    orgaos_demandantes = db.relationship('OrgaoDemandanteParticipante', backref='participante', lazy=True)
+    # ==========================================================================
+    # 6. DADOS DA FAMÍLIA
+    # ==========================================================================
+        chefe_familia = db.Column(db.String(50))
+        chefe_familia_outro = db.Column(db.String(50))
+        religiao_familia = db.Column(db.String(50))
+        local_trabalho_familia = db.Column(db.String(100))
+        renda_familiar = db.Column(db.Numeric(10, 2))
+        familia_possui_deficiencia = db.Column(db.Boolean)
+        deficiente_sexo = db.Column(db.String(20))
+        deficiente_faixa_etaria = db.Column(db.String(20))
+
+    # ==========================================================================
+    # 7. SAÚDE E CONTATO
+    # ==========================================================================
+        medicamento_uso = db.Column(db.Text)
+        alergia_descricao = db.Column(db.Text)
+        tecnico_responsavel = db.Column(db.String(100))
+        responsavel_geral = db.Column(db.String(100))
+        telefone_contato = db.Column(db.String(20))
+        bpc_deficiencia_especificar = db.Column(db.Text)
+
+    # ==========================================================================
+    # RELAÇÕES (Listas / Checkboxes)
+    # ==========================================================================
+        familiares = db.relationship('Familiar', backref='participante', lazy=True)
+        beneficios = db.relationship('BeneficioParticipante', backref='participante', lazy=True) 
+        orgaos_demandantes = db.relationship('OrgaoDemandanteParticipante', backref='participante', lazy=True)
 
     def to_dict(self):
         # Formata a data para string se ela existir
@@ -69,7 +143,6 @@ class Participante(db.Model):
         renda = float(self.renda_familiar) if self.renda_familiar else 0.0
 
         return {
-            # --- Identificação ---
             'id': self.id,
             'nomeCompleto': self.nome_completo,
             'cpf': self.cpf,
@@ -78,32 +151,27 @@ class Participante(db.Model):
             'nis': self.nis,
             'status': self.status,
             
-            # --- Localidade ---
             'ufNaturalidade': self.uf_naturalidade,
             'naturalidadeCidade': self.naturalidade_cidade,
             'endereco': self.endereco,
             
-            # --- Documentos ---
             'rg': self.rg,
             'orgaoEmissor': self.orgao_emissor,
             'ufRg': self.uf_rg,
             'certidaoFls': self.certidao_fls,
             
-            # --- Responsáveis ---
             'nomeResponsavel': self.nome_responsavel,
             'cpfResponsavel': self.cpf_responsavel,
             'nisResponsavel': self.nis_responsavel,
             'rgResponsavel': self.rg_responsavel,
             
-            # --- Dados Escolares ---
             'situacao_escolar': self.situacao_escolar,
             'frequenta_eja': self.frequenta_eja,
             'serie': self.serie,
             'eja_semestre': self.eja_semestre,
             'nome_escola': self.nome_escola,
             
-            # --- Encaminhamento e Entidade ---
-            'orgaoDemandante': [o.nome_orgao for o in self.orgaos_demandantes], # Lista de strings
+            'orgaoDemandante': [o.nome_orgao for o in self.orgaos_demandantes],
             'orgaoDemandanteOutro': self.orgao_demandante_outro,
             'crasReferencia': self.cras_referencia,
             'tecnicoReferencia': self.tecnico_referencia,
@@ -113,7 +181,6 @@ class Participante(db.Model):
             'telefoneEntidade': self.telefone_entidade,
             'responsavelPreenchimento': self.responsavel_preenchimento,
             
-            # --- Dados da Família ---
             'chefeFamilia': self.chefe_familia,
             'chefeFamiliaOutro': self.chefe_familia_outro,
             'religiaoFamilia': self.religiao_familia,
@@ -124,15 +191,15 @@ class Participante(db.Model):
             'deficienteFaixaEtaria': self.deficiente_faixa_etaria,
             'familiares': [{'nome': f.nome, 'parentesco': f.parentesco, 'idade': f.idade} for f in self.familiares],
             
-            # --- Saúde e Contato ---
             'medicamentoUso': self.medicamento_uso,
             'alergiaDescricao': self.alergia_descricao,
             'tecnicoResponsavel': self.tecnico_responsavel,
             'responsavelGeral': self.responsavel_geral,
             'telefoneContato': self.telefone_contato,
             'bpcDeficienciaEspecificar': self.bpc_deficiencia_especificar,
-            'beneficios': [b.nome_beneficio for b in self.beneficios] # Lista de strings
+            'beneficios': [b.nome_beneficio for b in self.beneficios]
         }
+
 
 class Familiar(db.Model):
     __tablename__ = 'familiares'
@@ -169,7 +236,7 @@ def login():
     if not cpf or not senha:
         return jsonify({"msg": "CPF e Senha são obrigatórios"}), 400
 
-    usuario = Usuario.query.filter_by(cpf=cpf).first()
+    usuario = Participante.query.filter_by(cpf=cpf).first()
 
     if usuario and bcrypt.check_password_hash(usuario.password_hash, senha):
         # Cria token
@@ -177,7 +244,7 @@ def login():
         return jsonify({
             'access_token': access_token, 
             'nome': usuario.nome,
-            'email': usuario.email
+            'cpf': usuario.cpf
         }), 200
 
     return jsonify({"msg": "Credenciais inválidas"}), 401
@@ -219,7 +286,7 @@ def cadastro_usuario():
 
 
 # 3. CADASTRO DE PARTICIPANTE (O Formulário Grande)
-@app.route("/api/participantes", methods=['POST'])
+@app.route("/api/cadastro", methods=['POST'])
 @jwt_required()
 def cadastrar_participante():
     dados = request.get_json()
