@@ -5,6 +5,7 @@ import Button from './Button';
 import brasao from '../assets/brasao.png';
 import instituto from '../assets/instituto.png';
 import sagrado from '../assets/Sagrado.png';
+import gif from '../assets/livro.gif'; // Substitua pelo seu GIF animado
 
 const Home = () => {
   const navigate = useNavigate();
@@ -20,6 +21,10 @@ const Home = () => {
     navigate('/login'); // Navega para a página de login
   };
 
+  const handleCreditsClick = () => {
+    navigate('/creditos');
+  };
+
   return (
     <div className={`app-container ${isMenuOpen ? 'menu-open' : ''}`}>
       {/* Início do Menu Hambúrguer */}
@@ -33,9 +38,9 @@ const Home = () => {
         </label>
         <nav className="menu">
           <ul>
-            <li><a href="#">Quem somos?</a></li>
-            <li><a href="#">Onde estamos?</a></li>
-            <li><a href="#">Pedir ajuda</a></li>
+            <li><a href="https://www.instagram.com/projetos_sociaisiascj/" target="_blank" rel="noopener noreferrer">Quem somos?</a></li>
+            <li><a href="https://www.google.com.br/maps/place/Av.+Santa+Beatriz+da+Silva,+7-40+-+Ferradura+Mirim,+Bauru+-+SP,+17031-365/@-22.3139096,-49.0167234,17z/data=!3m1!4b1!4m6!3m5!1s0x94bf5d04f596b605:0x46d43e54bd740c87!8m2!3d-22.3139096!4d-49.0141485!16s%2Fg%2F11sg_xdlnj?entry=ttu&g_ep=EgoyMDI1MTExNy4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer">Onde estamos?</a></li>
+            <li><a href="https://wa.link/83wegp" target="_blank" rel="noopener noreferrer">Pedir ajuda</a></li>
           </ul>
         </nav>
       </div>
@@ -52,6 +57,13 @@ const Home = () => {
           Já possui um cadastro? <a href="#" onClick={handleLoginLinkClick}>Entrar</a>
         </p>
       </div>
+
+      <button className="floating-credits-btn" onClick={handleCreditsClick}>
+        <span className="transition"></span>
+        <span className="gradient"></span>
+        <span className="label">Créditos</span>
+      </button>
+
     </div>
   );
 };
