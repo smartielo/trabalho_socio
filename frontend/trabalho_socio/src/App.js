@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import Cadastro from './pages/Cadastro';
 import Creditos from './pages/Creditos';
 import Perfil from './pages/Perfil';
+import ListaParticipantes from './pages/ListaParticipantes';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/cadastro" element={<Cadastro />} />
         <Route path="/creditos" element={<Creditos />} />
         <Route path="/perfil/:id" element={<Perfil />} />
+        <Route path="/participantes" element={<ListaParticipantes />} />
       </Routes>
     </BrowserRouter>
   );

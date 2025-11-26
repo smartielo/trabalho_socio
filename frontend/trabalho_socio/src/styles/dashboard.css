@@ -95,17 +95,23 @@
   color: #fff;
   margin-bottom: 0; /* Remove margem inferior do h3 */
   flex-shrink: 0; /* Impede que o título encolha */
+  white-space: nowrap; /* Impede que o título quebre linha */
 }
 
 .search-widget .input {
   flex-grow: 1; /* Faz o input ocupar o espaço disponível */
+  margin-bottom: 0; /* Garante que o input não tenha margem inferior */
 }
 
-/* Garante que o botão de busca tenha a mesma altura do input */
+/* CORREÇÃO: Remove margens e alinha os botões */
 .search-widget .submit-button {
   height: 45px; /* Mesma altura definida para .input em cadastro.css */
   flex-shrink: 0; /* Impede que o botão encolha */
-  box-sizing: border-box; /* Garante que a altura inclua padding e borda, alinhando-o perfeitamente */
+  box-sizing: border-box; 
+  margin: 0 !important; /* Força a remoção de qualquer margem externa */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* --- Linha de Widgets (Listas e Gráficos) --- */

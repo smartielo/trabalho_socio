@@ -10,6 +10,10 @@ ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarEle
 
 const PageDashboard = () => {
   const navigate = useNavigate();
+  
+  // Estado para a busca
+  const [searchTerm, setSearchTerm] = useState('');
+  
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -175,6 +179,35 @@ const PageDashboard = () => {
         <div className="kpi-card warning"><h2>{dashboardData.pendingRegistrations}</h2><p>Pendentes</p></div>
         <div className="kpi-card danger"><h2>{dashboardData.priorityAudience}</h2><p>Público Prioritário</p></div>
         <div className="kpi-card danger"><h2>{dashboardData.familiasPNE}</h2><p>Famílias PNE</p></div>
+      </div>
+
+      {/* Widget de Busca FUNCIONAL */}
+      <div className="search-widget">
+        <h3>Buscar Participante</h3>
+        <input 
+            type="text" 
+            placeholder="Digite o nome ou CPF..." 
+            className="input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && navigate(`/participantes?q=${searchTerm}`)}
+        />
+        <button 
+            type="button" 
+            className="submit-button"
+            onClick={() => navigate(`/participantes?q=${searchTerm}`)}
+        >
+            Buscar
+        </button>
+        
+        {/* Botão para ver todos */}
+        <button 
+            type="button" 
+            className="submit-button"
+            onClick={() => navigate('/participantes')}
+        >
+            Ver Todos
+        </button>
       </div>
 
       {/* Listas */}
