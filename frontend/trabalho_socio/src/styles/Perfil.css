@@ -1,0 +1,27 @@
+/* src/styles/Perfil.css */
+
+.perfil-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  width: 100%;
+}
+
+/* Faz com que os inputs não editáveis pareçam desabilitados */
+input:read-only {
+  background-color: #e9ecef; /* Um cinza claro */
+  cursor: not-allowed;
+}
+
+/* Estilo para o botão de cancelar, sobrescrevendo a cor do submit-button */
+.submit-button.cancel-button {
+  background-color: #5c0017; /* Mesma cor de fundo do botão principal */
+  border-color: #bea0a0; /* Mesma cor de borda do botão principal */
+  color: #bea0a0; /* Texto branco para contraste */
+}
+
+.submit-button.cancel-button:hover {
+  background-color: #7e0020; /* Mesmo hover do botão principal */
+  color: #fff; /* Mantém o texto branco no hover */
+}

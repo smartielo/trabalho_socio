@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import InputMask from 'react-input-mask';
 
 import '../styles/Login.css'; // Estilos específicos do Login
 import '../styles/cadastro.css'; // Reutiliza estilos do cadastro
@@ -32,6 +31,13 @@ const Login = () => {
       return;
     }
 
+    // REATIVADO TEMPORARIAMENTE: Login de admin para criar o primeiro usuário
+    if (cpf === 'admin' && senha === 'admin') {
+      // Não vamos setar token aqui, apenas navegar para o dashboard
+      navigate('/dashboard');
+      return;
+    }
+
     try {
       // A URL deve corresponder à rota do seu backend para login
       const response = await fetch('http://localhost:5000/api/login', {
@@ -42,9 +48,16 @@ const Login = () => {
 
       if (response.ok) {
         const data = await response.json();
-        // Sucesso! Armazene o token e redirecione
+        // Sucesso! Armazena o token e os dados do usuário
         localStorage.setItem('token', data.token);
-        navigate('/dashboard');
+
+        // Verifica se o usuário é um administrador
+        if (data.user && data.user.isAdmin) {
+          navigate('/dashboard'); // Redireciona admin para o Dashboard
+        } else {
+          // Redireciona usuário comum para a página de perfil
+          navigate('/perfil');
+        }
       } else {
         // Tenta ler a mensagem de erro do backend
         const data = await response.json();
@@ -72,7 +85,7 @@ const Login = () => {
         <form onSubmit={handleLogin}>
           <div className="form-group">
             <label htmlFor="cpf" className="cadastro-label">CPF</label>
-            <InputMask mask="999.999.999-99" maskChar={null} id="cpf" name="cpf" className="input" placeholder="Digite seu CPF" value={cpf} onChange={(e) => setCpf(e.target.value)} />
+            <input type="text" id="cpf" name="cpf" className="input" placeholder="Digite seu CPF" value={cpf} onChange={(e) => setCpf(e.target.value)} />
           </div>
           <div className="form-group">
             <label htmlFor="senha" className="cadastro-label">Senha</label>

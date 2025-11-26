@@ -1,0 +1,113 @@
+.gerenciar-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 15px;
+    margin-bottom: 2rem;
+}
+
+.user-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.user-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    border-left: 5px solid #FEBF00;
+    transition: background-color 0.3s ease;
+}
+
+/* --- ALTERAÇÃO: Estilos por tipo de usuário --- */
+.user-card.admin {
+    border-left-color: #FEBF00; /* Amarelo para Admin */
+}
+.user-card.master {
+    border-left-color: #ff4d4d; /* Vermelho para Admin Master */
+}
+.user-card.comum {
+    border-left-color: #42a5f5; /* Azul para Usuário Comum */
+}
+/* ------------------------------------------- */
+
+.user-card:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.user-name {
+    color: #fff;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.user-cpf {
+    color: #ccc;
+    font-size: 0.9rem;
+}
+
+.user-role {
+    color: #FEBF00;
+    font-weight: bold;
+    font-size: 0.9rem;
+    background-color: rgba(254, 191, 0, 0.1);
+    padding: 2px 8px;
+    border-radius: 5px;
+    align-self: flex-start;
+}
+
+.user-role.master {
+    color: #ff4d4d;
+    background-color: rgba(255, 77, 77, 0.1);
+}
+
+/* --- ALTERAÇÃO: Estilo para tag de usuário comum --- */
+.user-role.comum {
+    color: #42a5f5;
+    background-color: rgba(66, 165, 245, 0.1);
+}
+/* ------------------------------------------------- */
+
+.remove-user-btn {
+    background-color: #8B0000; /* Vermelho escuro */
+    color: #fff;
+    border: 1px solid #ff4d4d;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.remove-user-btn:hover:not(:disabled) {
+    background-color: #B22222; /* Vermelho mais claro */
+}
+
+.remove-user-btn:disabled {
+    background-color: #555;
+    border-color: #777;
+    cursor: not-allowed;
+}
+
+.empty-list-message {
+    color: #fff;
+    text-align: center;
+    padding: 2rem;
+}
+
+/* Ajuste no cabeçalho do Dashboard para múltiplos botões */
+.dashboard-header-actions {
+    display: flex;
+    gap: 1rem;
+}

@@ -21,7 +21,7 @@ ChartJS.register(
 );
 
 // --- DADOS FICTÍCIOS (MOCK) ATUALIZADOS COM BASE NO CADASTRO.JS ---
-const dashboardData = {
+const mockDashboardData = { // --- ALTERAÇÃO: Renomeado para evitar conflito ---
   totalParticipants: 87,
   capacity: 120,
   pendingRegistrations: 5,
@@ -55,11 +55,11 @@ const dashboardData = {
 
 // Dados para o Gráfico de Pizza (Doughnut) - AGORA DE ENCAMINHAMENTOS
 const doughnutData = {
-  labels: dashboardData.encaminhamentosData.labels,
+  labels: mockDashboardData.encaminhamentosData.labels,
   datasets: [
     {
       label: 'Origem',
-      data: dashboardData.encaminhamentosData.values,
+      data: mockDashboardData.encaminhamentosData.values,
       // NOVAS CORES VIBRANTES
       backgroundColor: [
         'rgba(255, 140, 0, 0.8)',   // Laranja Vibrante
@@ -82,11 +82,11 @@ const doughnutData = {
 
 // Dados para o Gráfico de Barras (Bar) - AGORA DE PÚBLICO ALVO
 const barData = {
-  labels: dashboardData.publicoAlvoData.labels,
+  labels: mockDashboardData.publicoAlvoData.labels,
   datasets: [
     {
       label: 'Número de Participantes',
-      data: dashboardData.publicoAlvoData.values,
+      data: mockDashboardData.publicoAlvoData.values,
       backgroundColor: '#ffae00ff',
       borderColor: '#ffa600ff',
       borderWidth: 1,
@@ -115,43 +115,64 @@ const PageDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResult, setSearchResult] = useState(null); // null | 'not_found' | { user_object }
+
   useEffect(() => {
     const fetchDashboardData = async () => {
       const token = localStorage.getItem('token');
-
       if (!token) {
-        navigate('/login'); // Se não houver token, redireciona para o login
+        navigate('/login');
         return;
       }
 
       try {
-        // A URL deve corresponder à rota do seu backend para o dashboard
         const response = await fetch('http://localhost:5000/api/dashboard', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` // Envia o token para autenticação
-          },
+          headers: { 'Authorization': `Bearer ${token}` }
         });
 
         if (response.ok) {
           const data = await response.json();
-          setDashboardData(data); // Armazena os dados recebidos do backend
+          setDashboardData(data);
         } else {
-          // Se o token for inválido ou expirado, o backend retornará um erro
-          setError('Sessão inválida ou expirada. Por favor, faça login novamente.');
-          localStorage.removeItem('token'); // Limpa o token inválido
+          setError('Sessão inválida. Faça login novamente.');
+          localStorage.removeItem('token');
           navigate('/login');
         }
       } catch (err) {
-        setError('Falha ao carregar os dados do dashboard. Verifique a conexão com o servidor.');
+        setError('Falha ao carregar os dados do dashboard.');
       } finally {
-        setLoading(false); // Finaliza o estado de carregamento
+        setLoading(false);
       }
     };
 
     fetchDashboardData();
   }, [navigate]);
+
+  const handleSearch = async () => {
+    if (!searchTerm.trim()) {
+      setSearchResult(null);
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+    try {
+      const response = await fetch(`http://localhost:5000/api/participantes/search?q=${searchTerm}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSearchResult(data);
+      } else if (response.status === 404) {
+        setSearchResult('not_found');
+      } else {
+        alert('Erro ao realizar a busca.');
+      }
+    } catch (err) {
+      alert('Falha de conexão ao buscar participante.');
+    }
+  };
 
   // Enquanto os dados não chegam, pode-se exibir uma mensagem de carregamento
   if (loading) {
@@ -159,9 +180,12 @@ const PageDashboard = () => {
   }
 
   // Se houver um erro, exibe a mensagem de erro
-  if (error || !dashboardData) {
-    return <div className="dashboard-container"><h1>{error || 'Não foi possível carregar os dados.'}</h1></div>;
+  if (error) {
+    return <div className="dashboard-container"><h1>{error}</h1></div>;
   }
+
+  // Se dashboardData for null, retorna um container vazio para evitar erros
+  if (!dashboardData) return <div className="dashboard-container"></div>;
 
   const availableSlots = dashboardData.capacity - dashboardData.totalParticipants;
 
@@ -170,9 +194,14 @@ const PageDashboard = () => {
       
       <div className="dashboard-header">
         <h1>Dashboard Administrativo</h1>
-        <Link to="/cadastro" className="submit-button" style={{ textDecoration: 'none', textAlign: 'center' }}>
-          + Nova Matrícula
-        </Link>
+        <div className="dashboard-header-actions">
+          <Link to="/cadastro-admin" state={{ fromDashboard: true }} className="submit-button" style={{ textDecoration: 'none' }}>
+            Cadastrar Administrador
+          </Link>
+          <Link to="/gerenciar-usuarios" state={{ fromDashboard: true }} className="submit-button" style={{ textDecoration: 'none' }}>
+            Gerenciar Usuários
+          </Link>
+        </div>
       </div>
 
       {/* --- KPIs (Indicadores-Chave) - ADICIONADO +1 KPI --- */}
@@ -203,9 +232,26 @@ const PageDashboard = () => {
       {/* --- Widget de Busca --- */}
       <div className="search-widget">
         <h3>Buscar Participante</h3>
-        <input type="text" placeholder="Digite o nome ou CPF..." className="input" />
-        <button type="button" className="submit-button">Buscar</button>
+        <input 
+          type="text" 
+          placeholder="Digite o nome ou CPF..." 
+          className="input"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <button type="button" className="submit-button" onClick={handleSearch}>Buscar</button>
       </div>
+
+      {/* --- ALTERAÇÃO 4: Container para exibir o resultado da busca --- */}
+      {searchResult && (
+        <div className="search-result-widget">
+          {searchResult === 'not_found' ? (
+            <p>Participante não encontrado.</p>
+          ) : (
+            <div className="search-result-item"><strong>{searchResult.name}</strong> <Link to={`/perfil/${searchResult.id}`}>ver</Link></div>
+          )}
+        </div>
+      )}
 
       {/* --- Listas de Ação --- */}
       <div className="dashboard-row">
@@ -256,6 +302,13 @@ const PageDashboard = () => {
             <Bar data={barData} options={barOptions} />
           </div>
         </div>
+      </div>
+
+      {/* --- ALTERAÇÃO 5: Botão de Voltar no final da página --- */}
+      <div className="back-button-container" style={{ marginTop: '3rem' }}>
+        <button className="back-button" onClick={() => navigate('/')}>
+          Voltar
+        </button>
       </div>
 
     </div>
