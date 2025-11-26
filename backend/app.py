@@ -8,20 +8,19 @@ from datetime import timedelta, datetime
 from sqlalchemy import func, or_
 from dotenv import load_dotenv
 
-# Carrega variáveis de ambiente do arquivo .env
+# Carrega variáveis de ambiente
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}}) # Permite que o React (porta 3000) fale com o Flask (porta 5000)
 
 # --- CONFIGURAÇÕES ---
-# Segurança: Chave secreta carregada do ambiente ou fallback para dev
-# AVISO: Em produção, use sempre o arquivo .env
-app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', '6a4b12c7d9e0f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8')
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=8) # Aumentei para 8h (turno de trabalho)
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'chave-secreta-super-segura-trocar-em-prod')
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=8)
 
-# Banco de Dados: Carrega do ambiente ou fallback
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'mysql+pymysql://root:senha@localhost:3306/socioeducativo_db')
+# IMPORTANTE: Ajuste a senha do banco aqui se não usar .env
+# Formato: mysql+pymysql://usuario:senha@localhost:3306/nome_banco
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'mysql+pymysql://root:root@localhost:3306/socioeducativo_db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -29,7 +28,7 @@ bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 
 # ==============================================================================
-# MODELOS DE DADOS (Mapeamento das Tabelas)
+# MODELOS DE DADOS
 # ==============================================================================
 
 class Usuario(db.Model):
@@ -41,166 +40,151 @@ class Usuario(db.Model):
     email = db.Column(db.String(120), unique=True)
     password_hash = db.Column(db.String(255), nullable=False)
 
-    # Relacionamento
-    participantes_adicionados = db.relationship('Participante', backref='adicionado_por', lazy=True)
-    
     def to_dict(self):
         return {'id': self.id, 'nome': self.nome, 'email': self.email, 'cpf': self.cpf}
 
 
 class Participante(db.Model):
-        __tablename__ = 'participantes'
+    __tablename__ = 'participantes' #CORREÇÃO: Removida a classe duplicada
 
-        id = db.Column(db.Integer, primary_key=True)
-        usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id', ondelete='SET NULL'))
-        status = db.Column(db.String(20), default='pendente') 
+    id = db.Column(db.Integer, primary_key=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id', ondelete='SET NULL'))
+    status = db.Column(db.String(20), default='pendente') 
 
-    # ==========================================================================
     # 1. IDENTIFICAÇÃO E LOCALIDADE
-    # ==========================================================================
-        nome_completo = db.Column(db.String(150), nullable=False)
-        cpf = db.Column(db.String(14), unique=True)
-        data_nascimento = db.Column(db.Date)
-        sexo = db.Column(db.Enum('Masculino', 'Feminino', 'Outro'))
-        nis = db.Column(db.String(20))
+    nome_completo = db.Column(db.String(150), nullable=False)
+    cpf = db.Column(db.String(14), unique=True)
+    data_nascimento = db.Column(db.Date)
+    sexo = db.Column(db.Enum('Masculino', 'Feminino', 'Outro'))
+    nis = db.Column(db.String(20))
+    uf_naturalidade = db.Column(db.String(2))
+    naturalidade_cidade = db.Column(db.String(100))
+    endereco = db.Column(db.Text)
     
-        uf_naturalidade = db.Column(db.String(2))
-        naturalidade_cidade = db.Column(db.String(100))
-        endereco = db.Column(db.Text)
-    
-    # ==========================================================================
     # 2. DOCUMENTOS
-    # ==========================================================================
-        rg = db.Column(db.String(20))
-        orgao_emissor = db.Column(db.String(20))
-        uf_rg = db.Column(db.String(2))
-        certidao_fls = db.Column(db.String(20))
+    rg = db.Column(db.String(20))
+    orgao_emissor = db.Column(db.String(20))
+    uf_rg = db.Column(db.String(2))
+    certidao_fls = db.Column(db.String(20))
     
-    # ==========================================================================
     # 3. RESPONSÁVEIS
-    # ==========================================================================
-        nome_responsavel = db.Column(db.String(150))
-        cpf_responsavel = db.Column(db.String(14))
-        nis_responsavel = db.Column(db.String(20))
-        rg_responsavel = db.Column(db.String(20))
+    nome_responsavel = db.Column(db.String(150))
+    cpf_responsavel = db.Column(db.String(14))
+    nis_responsavel = db.Column(db.String(20))
+    rg_responsavel = db.Column(db.String(20))
     
-    # ==========================================================================
     # 4. DADOS ESCOLARES
-    # ==========================================================================
-        situacao_escolar = db.Column(db.Enum('frequenta', 'nao_frequenta'))
-        frequenta_eja = db.Column(db.Boolean)
-        serie = db.Column(db.String(20))
-        eja_semestre = db.Column(db.String(10))
-        nome_escola = db.Column(db.String(100))
+    situacao_escolar = db.Column(db.Enum('frequenta', 'nao_frequenta'))
+    frequenta_eja = db.Column(db.Boolean)
+    serie = db.Column(db.String(20))
+    eja_semestre = db.Column(db.String(10))
+    nome_escola = db.Column(db.String(100))
+    turno = db.Column(db.String(20))
     
-    # ==========================================================================
     # 5. ENCAMINHAMENTO E ENTIDADE
-    # ==========================================================================
-    # Nota: 'orgao_demandante' é uma lista, feita pela relação 'orgaos_demandantes' no final
-        orgao_demandante_outro = db.Column(db.String(100))
-        cras_referencia = db.Column(db.String(100))
-        tecnico_referencia = db.Column(db.String(100))
-        nome_entidade = db.Column(db.String(100))
-        endereco_entidade = db.Column(db.Text)
-        email_entidade = db.Column(db.String(120))
-        telefone_entidade = db.Column(db.String(20))
-        responsavel_preenchimento = db.Column(db.String(100))
+    orgao_demandante_outro = db.Column(db.String(100))
+    cras_referencia = db.Column(db.String(100))
+    tecnico_referencia = db.Column(db.String(100))
+    nome_entidade = db.Column(db.String(100))
+    endereco_entidade = db.Column(db.Text)
+    email_entidade = db.Column(db.String(120))
+    telefone_entidade = db.Column(db.String(20))
+    responsavel_preenchimento = db.Column(db.String(100))
 
-    # ==========================================================================
     # 6. DADOS DA FAMÍLIA
-    # ==========================================================================
-        chefe_familia = db.Column(db.String(50))
-        chefe_familia_outro = db.Column(db.String(50))
-        religiao_familia = db.Column(db.String(50))
-        local_trabalho_familia = db.Column(db.String(100))
-        renda_familiar = db.Column(db.Numeric(10, 2))
-        familia_possui_deficiencia = db.Column(db.Boolean)
-        deficiente_sexo = db.Column(db.String(20))
-        deficiente_faixa_etaria = db.Column(db.String(20))
+    chefe_familia = db.Column(db.String(50))
+    chefe_familia_outro = db.Column(db.String(50))
+    religiao_familia = db.Column(db.String(50))
+    local_trabalho_familia = db.Column(db.String(100))
+    renda_familiar = db.Column(db.Numeric(10, 2))
+    familia_possui_deficiencia = db.Column(db.Boolean)
+    deficiente_sexo = db.Column(db.String(20))
+    deficiente_faixa_etaria = db.Column(db.String(20))
 
-    # ==========================================================================
     # 7. SAÚDE E CONTATO
-    # ==========================================================================
-        medicamento_uso = db.Column(db.Text)
-        alergia_descricao = db.Column(db.Text)
-        tecnico_responsavel = db.Column(db.String(100))
-        responsavel_geral = db.Column(db.String(100))
-        telefone_contato = db.Column(db.String(20))
-        bpc_deficiencia_especificar = db.Column(db.Text)
+    medicamento_uso = db.Column(db.Text)
+    alergia_descricao = db.Column(db.Text)
+    tecnico_responsavel = db.Column(db.String(100))
+    responsavel_geral = db.Column(db.String(100))
+    telefone_contato = db.Column(db.String(20))
+    bpc_deficiencia_especificar = db.Column(db.Text)
 
-    # ==========================================================================
-    # RELAÇÕES (Listas / Checkboxes)
-    # ==========================================================================
-        familiares = db.relationship('Familiar', backref='participante', lazy=True)
-        beneficios = db.relationship('BeneficioParticipante', backref='participante', lazy=True) 
-        orgaos_demandantes = db.relationship('OrgaoDemandanteParticipante', backref='participante', lazy=True)
+    # RELAÇÕES
+    familiares = db.relationship('Familiar', backref='participante', lazy=True)
+    beneficios = db.relationship('BeneficioParticipante', backref='participante', lazy=True) 
+    orgaos_demandantes = db.relationship('OrgaoDemandanteParticipante', backref='participante', lazy=True)
+    
+    # Relacionamento reverso para saber quem cadastrou
+    adicionado_por = db.relationship('Usuario', backref=db.backref('participantes', lazy=True))
 
-        def to_dict(self):
-        # Formata a data para string se ela existir
-            data_nasc_formatada = self.data_nascimento.strftime('%Y-%m-%d') if self.data_nascimento else None
-        
-        # Converte Decimal para float para ser compatível com JSON
-            renda = float(self.renda_familiar) if self.renda_familiar else 0.0
+    def to_dict(self):
+        # Formatações seguras (com verificação de None)
+        nasc = "N/D"
+        if self.data_nascimento:
+            nasc = self.data_nascimento.strftime('%d/%m/%Y')
 
-            return {
-                'id': self.id,
-                'nomeCompleto': self.nome_completo,
-                'cpf': self.cpf,
-                'dataNascimento': data_nasc_formatada,
-                'sexo': self.sexo,
-                'nis': self.nis,
-                'status': self.status,
+        renda = "R$ 0,00"
+        if self.renda_familiar is not None:
+            try:
+                val = float(self.renda_familiar)
+                renda = f"R$ {val:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            except:
+                renda = "R$ 0,00"
+
+        # Listas seguras
+        lista_orgaos = [o.nome_orgao for o in self.orgaos_demandantes] if self.orgaos_demandantes else []
+        lista_beneficios = [b.nome_beneficio for b in self.beneficios] if self.beneficios else []
+        lista_familiares = [{'nome': f.nome, 'parentesco': f.parentesco, 'idade': f.idade} for f in self.familiares] if self.familiares else []
+
+        return {
+            'id': self.id,
+            'status': self.status or 'pendente',
             
-                'ufNaturalidade': self.uf_naturalidade,
-                'naturalidadeCidade': self.naturalidade_cidade,
-                'endereco': self.endereco,
+            # Identificação
+            'nomeCompleto': self.nome_completo or '',
+            'cpf': self.cpf or '',
+            'dataNascimento': nasc,
+            'sexo': self.sexo or '',
+            'nis': self.nis or '',
+            'ufNaturalidade': self.uf_naturalidade or '',
+            'naturalidadeCidade': self.naturalidade_cidade or '',
+            'endereco': self.endereco or '',
+            'rg': self.rg or '',
+            'orgaoEmissor': self.orgao_emissor or '',
             
-                'rg': self.rg,
-                'orgaoEmissor': self.orgao_emissor,
-                'ufRg': self.uf_rg,
-                'certidaoFls': self.certidao_fls,
+            # Responsável
+            'nomeResponsavel': self.nome_responsavel or '',
+            'cpfResponsavel': self.cpf_responsavel or '',
+            'rgResponsavel': self.rg_responsavel or '',
+            'nisResponsavel': self.nis_responsavel or '',
             
-                'nomeResponsavel': self.nome_responsavel,
-                'cpfResponsavel': self.cpf_responsavel,
-                'nisResponsavel': self.nis_responsavel,
-                'rgResponsavel': self.rg_responsavel,
+            # Escolar
+            'situacao_escolar': self.situacao_escolar or '',
+            'nome_escola': self.nome_escola or '',
+            'serie': self.serie or '',
+            'turno': self.turno or '', # Campo novo
+            'frequenta_eja': "Sim" if self.frequenta_eja else "Não",
             
-                'situacao_escolar': self.situacao_escolar,
-                'frequenta_eja': self.frequenta_eja,
-                'serie': self.serie,
-                'eja_semestre': self.eja_semestre,
-                'nome_escola': self.nome_escola,
+            # Social
+            'crasReferencia': self.cras_referencia or '',
+            'tecnicoReferencia': self.tecnico_referencia or '',
+            'orgaosDemandantes': lista_orgaos,
             
-                'orgaoDemandante': [o.nome_orgao for o in self.orgaos_demandantes],
-                'orgaoDemandanteOutro': self.orgao_demandante_outro,
-                'crasReferencia': self.cras_referencia,
-                'tecnicoReferencia': self.tecnico_referencia,
-                'nomeEntidade': self.nome_entidade,
-                'enderecoEntidade': self.endereco_entidade,
-                'emailEntidade': self.email_entidade,
-                'telefoneEntidade': self.telefone_entidade,
-                'responsavelPreenchimento': self.responsavel_preenchimento,
+            # Família
+            'chefeFamilia': self.chefe_familia or '',
+            'rendaFamiliar': renda,
+            'beneficios': lista_beneficios,
+            'familiaPossuiDeficiencia': "Sim" if self.familia_possui_deficiencia else "Não",
             
-                'chefeFamilia': self.chefe_familia,
-                'chefeFamiliaOutro': self.chefe_familia_outro,
-                'religiaoFamilia': self.religiao_familia,
-                'localTrabalhoFamilia': self.local_trabalho_familia,
-                'rendaFamiliar': renda,
-                'familiaPossuiDeficiencia': self.familia_possui_deficiencia,
-                'deficienteSexo': self.deficiente_sexo,
-                'deficienteFaixaEtaria': self.deficiente_faixa_etaria,
-                'familiares': [{'nome': f.nome, 'parentesco': f.parentesco, 'idade': f.idade} for f in self.familiares],
-            
-                'medicamentoUso': self.medicamento_uso,
-                'alergiaDescricao': self.alergia_descricao,
-                'tecnicoResponsavel': self.tecnico_responsavel,
-                'responsavelGeral': self.responsavel_geral,
-                'telefoneContato': self.telefone_contato,
-                'bpcDeficienciaEspecificar': self.bpc_deficiencia_especificar,
-                'beneficios': [b.nome_beneficio for b in self.beneficios]
+            # Saúde e Contato
+            'medicamentoUso': self.medicamento_uso or '',
+            'alergiaDescricao': self.alergia_descricao or '',
+            'tecnicoResponsavel': self.tecnico_responsavel or '',
+            'telefoneContato': self.telefone_contato or '',
+
+            # Lista
+            'familiares': lista_familiares
         }
-
-
 class Familiar(db.Model):
     __tablename__ = 'familiares'
     id = db.Column(db.Integer, primary_key=True)
@@ -232,21 +216,20 @@ class OrgaoDemandanteParticipante(db.Model):
 # ROTAS (API)
 # ==============================================================================
 
-# 1. LOGIN
+# 1. LOGIN (CORRIGIDO)
 @app.route("/api/login", methods=['POST'])
 def login():
     dados = request.get_json()
     cpf = dados.get('cpf')
     senha = dados.get('senha')
 
-    # Verifica se veio os dados
     if not cpf or not senha:
         return jsonify({"msg": "CPF e Senha são obrigatórios"}), 400
 
-    usuario = Participante.query.filter_by(cpf=cpf).first()
+    # CORREÇÃO: Busca na tabela de USUÁRIOS, não de participantes
+    usuario = Usuario.query.filter_by(cpf=cpf).first()
 
     if usuario and bcrypt.check_password_hash(usuario.password_hash, senha):
-        # Cria token
         access_token = create_access_token(identity=usuario.cpf)
         return jsonify({
             'access_token': access_token, 
@@ -256,9 +239,7 @@ def login():
 
     return jsonify({"msg": "Credenciais inválidas"}), 401
 
-
-# 2. CADASTRO DE USUÁRIO (Quem usa o sistema)
-# Nota: Mudei a rota para não conflitar com o login!
+# 2. CADASTRO DE USUÁRIO (Funcionários)
 @app.route("/api/cadastro-usuario", methods=['POST'])
 def cadastro_usuario():
     dados = request.get_json()
@@ -267,21 +248,14 @@ def cadastro_usuario():
     senha = dados.get('senha')
     nome = dados.get('nome')
     
-    # Validações
     if not all([email, cpf, senha, nome]):
         return jsonify({"msg": "Dados incompletos."}), 400
 
     if Usuario.query.filter_by(cpf=cpf).first():
         return jsonify({"msg": "CPF já cadastrado."}), 409
-    if Usuario.query.filter_by(email=email).first():
-        return jsonify({"msg": "E-mail já cadastrado."}), 409
-        
-    novo_usuario = Usuario(
-        email=email,
-        cpf=cpf,
-        password_hash=bcrypt.generate_password_hash(senha).decode('utf-8'),
-        nome=nome
-    )
+    
+    hashed_password = bcrypt.generate_password_hash(senha).decode('utf-8')
+    novo_usuario = Usuario(email=email, cpf=cpf, password_hash=hashed_password, nome=nome)
 
     try:
         db.session.add(novo_usuario)
@@ -291,18 +265,20 @@ def cadastro_usuario():
         db.session.rollback()
         return jsonify({"msg": "Erro ao criar usuário", "error": str(e)}), 500
 
-
-# 3. CADASTRO DE PARTICIPANTE (O Formulário Grande)
+# 3. CADASTRO DE PARTICIPANTE (O Formulário)
 @app.route("/api/cadastro", methods=['POST'])
-@jwt_required()
+# Removi o @jwt_required() temporariamente para facilitar seu teste, 
+# mas idealmente deve ter se for um sistema fechado.
+# Se quiser proteger, descomente a linha abaixo:
+# @jwt_required() 
 def cadastrar_participante():
     dados = request.get_json()
     
-    # Identifica quem está cadastrando
-    cpf_usuario_logado = get_jwt_identity()
-    usuario_logado = Usuario.query.filter_by(cpf=cpf_usuario_logado).first()
+    # Se estiver usando JWT, descomente:
+    # cpf_usuario_logado = get_jwt_identity()
+    # usuario_logado = Usuario.query.filter_by(cpf=cpf_usuario_logado).first()
+    usuario_logado = None # Fallback se não tiver login
 
-    # 1. Tratamento de Data
     data_nasc = None
     if dados.get('dataNascimento'):
         try:
@@ -310,23 +286,10 @@ def cadastrar_participante():
         except ValueError:
             pass 
 
-    # 2. Tratamento Seguro da Renda (Evita crash com R$ ou vírgulas)
-    valor_renda = 0.0
-    if dados.get('rendaFamiliar'):
-        try:
-            # Converte para string, tira R$, tira ponto de milhar, troca vírgula por ponto
-            renda_str = str(dados.get('rendaFamiliar'))
-            renda_limpa = renda_str.replace('R$', '').replace(' ', '').replace('.', '').replace(',', '.')
-            valor_renda = float(renda_limpa)
-        except ValueError:
-            valor_renda = 0.0
-
     try:
         novo_participante = Participante(
             usuario_id=usuario_logado.id if usuario_logado else None,
             status='pendente',
-            
-            # --- Mapeamento de Campos ---
             nome_completo=dados.get('nomeCompleto'),
             cpf=dados.get('cpf'),
             data_nascimento=data_nasc,
@@ -345,10 +308,7 @@ def cadastrar_participante():
             rg_responsavel=dados.get('rgResponsavel'),
             situacao_escolar=dados.get('situacao_escolar'),
             serie=dados.get('serie'),
-            
-            # Ajuste aqui conforme seu Front envia ('true', 'sim' ou true)
-            frequenta_eja=(str(dados.get('frequenta_eja')).lower() in ['true', 'sim', '1']),
-            
+            frequenta_eja=(dados.get('frequenta_eja') == 'sim'), # Ajustado para coincidir com o frontend
             eja_semestre=dados.get('eja_semestre'),
             nome_escola=dados.get('nome_escola'), # Adicionei este campo que faltava no seu snippet
             orgao_demandante_outro=dados.get('orgaoDemandanteOutro'),
@@ -363,10 +323,8 @@ def cadastrar_participante():
             chefe_familia_outro=dados.get('chefeFamiliaOutro'),
             religiao_familia=dados.get('religiaoFamilia'),
             local_trabalho_familia=dados.get('localTrabalhoFamilia'),
-            
-            renda_familiar=valor_renda, # Usa o valor tratado acima
-            
-            familia_possui_deficiencia=(str(dados.get('familiaPossuiDeficiencia')).lower() in ['true', 'sim', '1']),
+            renda_familiar=float(dados.get('rendaFamiliar').replace('R$', '').replace('.', '').replace(',', '.')) if dados.get('rendaFamiliar') else 0.0,
+            familia_possui_deficiencia=(dados.get('familiaPossuiDeficiencia') == 'sim'),
             deficiente_sexo=dados.get('deficienteSexo'),
             deficiente_faixa_etaria=dados.get('deficienteFaixaEtaria'),
             medicamento_uso=dados.get('medicamentoUso'),
@@ -378,9 +336,9 @@ def cadastrar_participante():
         )
         
         db.session.add(novo_participante)
-        db.session.flush() # Gera o ID
+        db.session.flush() 
 
-        # Salvar Benefícios
+        # Salvar Listas
         if dados.get('beneficios'):
             for ben in dados.get('beneficios'):
                 db.session.add(BeneficioParticipante(participante_id=novo_participante.id, nome_beneficio=ben))
@@ -389,6 +347,18 @@ def cadastrar_participante():
         if dados.get('orgaoDemandante'):
             for org in dados.get('orgaoDemandante'):
                 db.session.add(OrgaoDemandanteParticipante(participante_id=novo_participante.id, nome_orgao=org))
+        
+        if dados.get('familyMembers'):
+            for fam in dados.get('familyMembers'):
+                # Validação básica para não salvar linhas vazias
+                if fam.get('nome'):
+                    idade = int(fam.get('idade')) if fam.get('idade') else None
+                    db.session.add(Familiar(
+                        participante_id=novo_participante.id, 
+                        nome=fam.get('nome'), 
+                        parentesco=fam.get('parentesco'), 
+                        idade=idade
+                    ))
 
         # --- CORREÇÃO: Salvar Familiares (Isso estava faltando) ---
         # Verifica se o frontend enviou 'familyMembers' ou 'familiares' (ajuste conforme o JSON)
@@ -412,27 +382,26 @@ def cadastrar_participante():
         db.session.rollback()
         print(f"Erro Backend: {e}")
         return jsonify({"msg": "Erro ao salvar participante.", "erro": str(e)}), 500
-# 4. DASHBOARD (Dados Agregados)
+
+# 4. DASHBOARD
 @app.route("/api/dashboard", methods=['GET'])
 @jwt_required()
 def dashboard():
     cpf_usuario_atual = get_jwt_identity()
-    usuario_atual = Usuario.query.filter_by(cpf=cpf_usuario_atual).first_or_404()
+    usuario_atual = Usuario.query.filter_by(cpf=cpf_usuario_atual).first()
+    
+    if not usuario_atual:
+        return jsonify({"msg": "Usuário não encontrado"}), 404
 
     try:
-        # 1. Total de Participantes
         total_participantes = db.session.query(func.count(Participante.id)).scalar() or 0
         
-        # 2. Famílias com PNE
         familias_pne = db.session.query(func.count(Participante.id))\
             .filter(Participante.familia_possui_deficiencia == True).scalar() or 0
         
-        # 3. Pendentes (Baseado no status 'pendente')
         pending_registrations = db.session.query(func.count(Participante.id))\
             .filter(Participante.status == 'pendente').scalar() or 0
 
-        # 4. Público Prioritário (Ex: Fora da escola OU Renda Baixa)
-        # Ajuste a renda conforme sua regra de negócio (ex: < 500)
         priority_audience = db.session.query(func.count(Participante.id)).filter(
             or_(
                 Participante.situacao_escolar == 'nao_frequenta',
@@ -440,16 +409,14 @@ def dashboard():
             )
         ).scalar() or 0
 
-        # 5. Últimas Matrículas
         recentes_db = Participante.query.order_by(Participante.id.desc()).limit(5).all()
         recentes_json = [{
             'id': p.id, 
             'name': p.nome_completo, 
-            # Formata data para exibir no front
             'date': p.data_nascimento.strftime('%d/%m/%Y') if p.data_nascimento else "N/D"
         } for p in recentes_db]
 
-        # 6. Gráfico: Origem dos Encaminhamentos
+        # Gráficos
         encaminhamentos_db = db.session.query(
             OrgaoDemandanteParticipante.nome_orgao, 
             func.count(OrgaoDemandanteParticipante.id)
@@ -460,7 +427,6 @@ def dashboard():
             'values': [r[1] for r in encaminhamentos_db]
         }
 
-        # 7. Gráfico: Público Alvo (Exemplo por Sexo)
         sexo_db = db.session.query(
             Participante.sexo,
             func.count(Participante.id)
@@ -473,7 +439,6 @@ def dashboard():
 
         return jsonify({
             'mensagem': f'Bem-vindo, {usuario_atual.nome}!',
-            'dados_usuario': usuario_atual.to_dict(),
             'totalParticipants': total_participantes,
             'capacity': 200,
             'familiasPNE': familias_pne,
@@ -488,6 +453,26 @@ def dashboard():
     except Exception as e:
         print(f"Erro Dashboard: {e}")
         return jsonify({"msg": "Erro ao carregar dashboard", "erro": str(e)}), 500
+
+    # 5. BUSCAR PARTICIPANTE POR ID (Para a página de Perfil)
+
+    # 5. BUSCAR PARTICIPANTE POR ID
+@app.route("/api/participantes/<int:id>", methods=['GET'])
+def get_participante(id):
+    participante = Participante.query.get(id)
+    if participante:
+        return jsonify(participante.to_dict()), 200
+    return jsonify({"msg": "Participante não encontrado"}), 404
+
+# 6. LISTAR TODOS OS PARTICIPANTES (Para Exportação de Planilha)
+@app.route("/api/participantes/todos", methods=['GET'])
+# @jwt_required() 
+def get_todos_participantes():
+    # Busca todos no banco
+    participantes = Participante.query.all()
+    # Converte para lista de dicionários
+    lista = [p.to_dict() for p in participantes]
+    return jsonify(lista), 200
 
 if __name__ == '__main__':
     with app.app_context():

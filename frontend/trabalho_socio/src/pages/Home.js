@@ -5,7 +5,6 @@ import Button from './Button';
 import brasao from '../assets/brasao.png';
 import instituto from '../assets/instituto.png';
 import sagrado from '../assets/Sagrado.png';
-import gif from '../assets/livro.gif'; // Substitua pelo seu GIF animado
 
 const Home = () => {
   const navigate = useNavigate();

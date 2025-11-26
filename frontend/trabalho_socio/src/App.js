@@ -6,9 +6,8 @@ import PageDashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Cadastro from './pages/Cadastro';
 import Creditos from './pages/Creditos';
-import CadastroAdmin from './pages/CadastroAdmin';
-import GerenciarUsuarios from './pages/GerenciarUsuarios';
 import Perfil from './pages/Perfil';
+import ListaParticipantes from './pages/ListaParticipantes';
 
 function App() {
   return (
@@ -21,9 +20,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/cadastro" element={<Cadastro />} />
         <Route path="/creditos" element={<Creditos />} />
-        <Route path="/cadastro-admin" element={<CadastroAdmin />} />
-        <Route path="/gerenciar-usuarios" element={<GerenciarUsuarios />} />
-        <Route path="/perfil" element={<Perfil />} />
+        <Route path="/perfil/:id" element={<Perfil />} />
+        <Route path="/participantes" element={<ListaParticipantes />} />
       </Routes>
     </BrowserRouter>
   );

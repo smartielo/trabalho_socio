@@ -48,16 +48,9 @@ const Login = () => {
 
       if (response.ok) {
         const data = await response.json();
-        // Sucesso! Armazena o token e os dados do usuário
-        localStorage.setItem('token', data.token);
-
-        // Verifica se o usuário é um administrador
-        if (data.user && data.user.isAdmin) {
-          navigate('/dashboard'); // Redireciona admin para o Dashboard
-        } else {
-          // Redireciona usuário comum para a página de perfil
-          navigate('/perfil');
-        }
+        // Sucesso! Armazene o token e redirecione
+        localStorage.setItem('token', data.access_token); 
+        navigate('/dashboard');
       } else {
         // Tenta ler a mensagem de erro do backend
         const data = await response.json();
