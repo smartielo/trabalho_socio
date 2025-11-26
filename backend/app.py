@@ -117,58 +117,72 @@ class Participante(db.Model):
     adicionado_por = db.relationship('Usuario', backref=db.backref('participantes', lazy=True))
 
     def to_dict(self):
-        # Formatações auxiliares
-        nasc = self.data_nascimento.strftime('%d/%m/%Y') if self.data_nascimento else "N/D"
-        renda = f"R$ {self.renda_familiar:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.') if self.renda_familiar else "R$ 0,00"
+        # Formatações seguras (com verificação de None)
+        nasc = "N/D"
+        if self.data_nascimento:
+            nasc = self.data_nascimento.strftime('%d/%m/%Y')
+
+        renda = "R$ 0,00"
+        if self.renda_familiar is not None:
+            try:
+                val = float(self.renda_familiar)
+                renda = f"R$ {val:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            except:
+                renda = "R$ 0,00"
+
+        # Listas seguras
+        lista_orgaos = [o.nome_orgao for o in self.orgaos_demandantes] if self.orgaos_demandantes else []
+        lista_beneficios = [b.nome_beneficio for b in self.beneficios] if self.beneficios else []
+        lista_familiares = [{'nome': f.nome, 'parentesco': f.parentesco, 'idade': f.idade} for f in self.familiares] if self.familiares else []
 
         return {
             'id': self.id,
-            'status': self.status,
+            'status': self.status or 'pendente',
             
-            # --- Identificação ---
-            'nomeCompleto': self.nome_completo,
-            'cpf': self.cpf,
+            # Identificação
+            'nomeCompleto': self.nome_completo or '',
+            'cpf': self.cpf or '',
             'dataNascimento': nasc,
-            'sexo': self.sexo,
-            'nis': self.nis,
-            'ufNaturalidade': self.uf_naturalidade,
-            'naturalidadeCidade': self.naturalidade_cidade,
-            'endereco': self.endereco,
-            'rg': self.rg,
-            'orgaoEmissor': self.orgao_emissor,
+            'sexo': self.sexo or '',
+            'nis': self.nis or '',
+            'ufNaturalidade': self.uf_naturalidade or '',
+            'naturalidadeCidade': self.naturalidade_cidade or '',
+            'endereco': self.endereco or '',
+            'rg': self.rg or '',
+            'orgaoEmissor': self.orgao_emissor or '',
             
-            # --- Responsável ---
-            'nomeResponsavel': self.nome_responsavel,
-            'cpfResponsavel': self.cpf_responsavel,
-            'rgResponsavel': self.rg_responsavel,
-            'nisResponsavel': self.nis_responsavel,
+            # Responsável
+            'nomeResponsavel': self.nome_responsavel or '',
+            'cpfResponsavel': self.cpf_responsavel or '',
+            'rgResponsavel': self.rg_responsavel or '',
+            'nisResponsavel': self.nis_responsavel or '',
             
-            # --- Escolar ---
-            'situacao_escolar': self.situacao_escolar,
-            'nome_escola': self.nome_escola,
-            'serie': self.serie,
-            'turno': db.Column(db.String(20)),
+            # Escolar
+            'situacao_escolar': self.situacao_escolar or '',
+            'nome_escola': self.nome_escola or '',
+            'serie': self.serie or '',
+            'turno': self.turno or '', # Campo novo
             'frequenta_eja': "Sim" if self.frequenta_eja else "Não",
             
-            # --- Social e Encaminhamento ---
-            'crasReferencia': self.cras_referencia,
-            'tecnicoReferencia': self.tecnico_referencia,
-            'orgaosDemandantes': [o.nome_orgao for o in self.orgaos_demandantes],
+            # Social
+            'crasReferencia': self.cras_referencia or '',
+            'tecnicoReferencia': self.tecnico_referencia or '',
+            'orgaosDemandantes': lista_orgaos,
             
-            # --- Família e Renda ---
-            'chefeFamilia': self.chefe_familia,
+            # Família
+            'chefeFamilia': self.chefe_familia or '',
             'rendaFamiliar': renda,
-            'beneficios': [b.nome_beneficio for b in self.beneficios],
+            'beneficios': lista_beneficios,
             'familiaPossuiDeficiencia': "Sim" if self.familia_possui_deficiencia else "Não",
             
-            # --- Saúde ---
-            'medicamentoUso': self.medicamento_uso,
-            'alergiaDescricao': self.alergia_descricao,
-            'tecnicoResponsavel': self.tecnico_responsavel,
-            'telefoneContato': self.telefone_contato,
+            # Saúde e Contato
+            'medicamentoUso': self.medicamento_uso or '',
+            'alergiaDescricao': self.alergia_descricao or '',
+            'tecnicoResponsavel': self.tecnico_responsavel or '',
+            'telefoneContato': self.telefone_contato or '',
 
-            # --- Lista de Familiares ---
-            'familiares': [{'nome': f.nome, 'parentesco': f.parentesco, 'idade': f.idade} for f in self.familiares]
+            # Lista
+            'familiares': lista_familiares
         }
 class Familiar(db.Model):
     __tablename__ = 'familiares'
@@ -424,6 +438,16 @@ def get_participante(id):
     if participante:
         return jsonify(participante.to_dict()), 200
     return jsonify({"msg": "Participante não encontrado"}), 404
+
+# 6. LISTAR TODOS OS PARTICIPANTES (Para Exportação de Planilha)
+@app.route("/api/participantes/todos", methods=['GET'])
+# @jwt_required() 
+def get_todos_participantes():
+    # Busca todos no banco
+    participantes = Participante.query.all()
+    # Converte para lista de dicionários
+    lista = [p.to_dict() for p in participantes]
+    return jsonify(lista), 200
 
 if __name__ == '__main__':
     with app.app_context():

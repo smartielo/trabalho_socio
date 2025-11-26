@@ -14,7 +14,7 @@ const PageDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Função para buscar dados (useCallback para não recriar a função toda vez)
+  // Função para buscar dados do Dashboard
   const fetchDashboardData = useCallback(async () => {
     setLoading(true);
     const token = localStorage.getItem('token');
@@ -48,15 +48,70 @@ const PageDashboard = () => {
     }
   }, [navigate]);
 
-  // Carrega os dados ao abrir a página
   useEffect(() => {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
-  // Função de Logout
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/');
+  };
+
+  // --- NOVA FUNÇÃO: GERAR CSV ---
+  const handleExportCSV = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      // 1. Busca a lista completa do backend
+      const response = await fetch('http://localhost:5000/api/participantes/todos', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (!response.ok) throw new Error('Erro ao baixar dados');
+      
+      const lista = await response.json();
+
+      if (lista.length === 0) {
+        alert("Nenhum participante para exportar.");
+        return;
+      }
+
+      // 2. Define o Cabeçalho do CSV
+      const headers = [
+        "ID", "Nome Completo", "CPF", "Nascimento", "Sexo", "Telefone", 
+        "Situação Escolar", "Renda Familiar", "Chefe Família"
+      ];
+
+      // 3. Converte os dados JSON para linhas de CSV
+      const csvRows = [
+        headers.join(';'), // Usa ponto-e-vírgula para Excel brasileiro reconhecer colunas
+        ...lista.map(p => [
+          p.id,
+          `"${p.nomeCompleto}"`, // Aspas evitam erro se tiver ponto e vírgula no nome
+          `"${p.cpf}"`,
+          p.dataNascimento,
+          p.sexo,
+          `"${p.telefoneContato || ''}"`,
+          p.situacao_escolar,
+          `"${p.rendaFamiliar}"`,
+          p.chefeFamilia
+        ].join(';'))
+      ];
+
+      // 4. Cria o arquivo e força o download
+      const csvString = "\uFEFF" + csvRows.join('\n'); // \uFEFF é para corrigir acentuação (BOM)
+      const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'lista_participantes.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+    } catch (error) {
+      alert("Erro ao gerar planilha: " + error.message);
+    }
   };
 
   if (loading && !dashboardData) return <div className="dashboard-container"><h1 style={{color:'#fff'}}>Carregando...</h1></div>;
@@ -95,11 +150,16 @@ const PageDashboard = () => {
       <div className="dashboard-header">
         <h1>Dashboard Administrativo</h1>
         
-        {/* --- NOVOS BOTÕES --- */}
         <div style={{ display: 'flex', gap: '10px' }}>
             <button onClick={fetchDashboardData} className="submit-button" style={{ padding: '10px 15px', fontSize: '0.9rem', backgroundColor: '#1E88E5', borderColor: '#1E88E5' }}>
                 🔄 Atualizar
             </button>
+            
+            {/* BOTÃO DE PLANILHA */}
+            <button onClick={handleExportCSV} className="submit-button" style={{ padding: '10px 15px', fontSize: '0.9rem', backgroundColor: '#28a745', borderColor: '#28a745' }}>
+                📊 Baixar Planilha
+            </button>
+
             <Link to="/cadastro" className="submit-button" style={{ textDecoration: 'none', textAlign: 'center', padding: '10px 15px', fontSize: '0.9rem' }}>
                 + Nova Matrícula
             </Link>
@@ -126,7 +186,6 @@ const PageDashboard = () => {
               <li key={item.id} className="list-item">
                 <strong>{item.name}</strong>
                 <span>{item.date}</span>
-                {/* Link corrigido para o perfil */}
                 <Link to={`/perfil/${item.id}`}>Ver Perfil</Link> 
               </li>
             ))}
