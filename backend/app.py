@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app) # Permite que o React (porta 3000) fale com o Flask (porta 5000)
+CORS(app, resources={r"/*": {"origins": "*"}}) # Permite que o React (porta 3000) fale com o Flask (porta 5000)
 
 # --- CONFIGURAÇÕES ---
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'chave-secreta-super-segura-trocar-em-prod')
@@ -78,6 +78,7 @@ class Participante(db.Model):
     serie = db.Column(db.String(20))
     eja_semestre = db.Column(db.String(10))
     nome_escola = db.Column(db.String(100))
+    turno = db.Column(db.String(20))
     
     # 5. ENCAMINHAMENTO E ENTIDADE
     orgao_demandante_outro = db.Column(db.String(100))
@@ -116,20 +117,58 @@ class Participante(db.Model):
     adicionado_por = db.relationship('Usuario', backref=db.backref('participantes', lazy=True))
 
     def to_dict(self):
+        # Formatações auxiliares
+        nasc = self.data_nascimento.strftime('%d/%m/%Y') if self.data_nascimento else "N/D"
+        renda = f"R$ {self.renda_familiar:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.') if self.renda_familiar else "R$ 0,00"
+
         return {
             'id': self.id,
+            'status': self.status,
+            
+            # --- Identificação ---
             'nomeCompleto': self.nome_completo,
             'cpf': self.cpf,
-            # Formata a data para string se ela existir
-            'dataNascimento': self.data_nascimento.strftime('%d/%m/%Y') if self.data_nascimento else None,
+            'dataNascimento': nasc,
             'sexo': self.sexo,
             'nis': self.nis,
+            'ufNaturalidade': self.uf_naturalidade,
+            'naturalidadeCidade': self.naturalidade_cidade,
+            'endereco': self.endereco,
+            'rg': self.rg,
+            'orgaoEmissor': self.orgao_emissor,
+            
+            # --- Responsável ---
+            'nomeResponsavel': self.nome_responsavel,
+            'cpfResponsavel': self.cpf_responsavel,
+            'rgResponsavel': self.rg_responsavel,
+            'nisResponsavel': self.nis_responsavel,
+            
+            # --- Escolar ---
             'situacao_escolar': self.situacao_escolar,
             'nome_escola': self.nome_escola,
-            # Converte Decimal para float para ser compatível com JSON
-            'rendaFamiliar': float(self.renda_familiar) if self.renda_familiar else 0.0,
+            'serie': self.serie,
+            'turno': db.Column(db.String(20)),
+            'frequenta_eja': "Sim" if self.frequenta_eja else "Não",
+            
+            # --- Social e Encaminhamento ---
+            'crasReferencia': self.cras_referencia,
+            'tecnicoReferencia': self.tecnico_referencia,
+            'orgaosDemandantes': [o.nome_orgao for o in self.orgaos_demandantes],
+            
+            # --- Família e Renda ---
+            'chefeFamilia': self.chefe_familia,
+            'rendaFamiliar': renda,
+            'beneficios': [b.nome_beneficio for b in self.beneficios],
+            'familiaPossuiDeficiencia': "Sim" if self.familia_possui_deficiencia else "Não",
+            
+            # --- Saúde ---
+            'medicamentoUso': self.medicamento_uso,
+            'alergiaDescricao': self.alergia_descricao,
+            'tecnicoResponsavel': self.tecnico_responsavel,
             'telefoneContato': self.telefone_contato,
-            'status': self.status
+
+            # --- Lista de Familiares ---
+            'familiares': [{'nome': f.nome, 'parentesco': f.parentesco, 'idade': f.idade} for f in self.familiares]
         }
 class Familiar(db.Model):
     __tablename__ = 'familiares'
