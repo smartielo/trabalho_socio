@@ -47,8 +47,8 @@ class Usuario(db.Model):
     def to_dict(self):
         return {'id': self.id, 'nome': self.nome, 'email': self.email, 'cpf': self.cpf}
 
+
 class Participante(db.Model):
-    class Participante(db.Model):
         __tablename__ = 'participantes'
 
         id = db.Column(db.Integer, primary_key=True)
@@ -135,69 +135,69 @@ class Participante(db.Model):
         beneficios = db.relationship('BeneficioParticipante', backref='participante', lazy=True) 
         orgaos_demandantes = db.relationship('OrgaoDemandanteParticipante', backref='participante', lazy=True)
 
-    def to_dict(self):
+        def to_dict(self):
         # Formata a data para string se ela existir
-        data_nasc_formatada = self.data_nascimento.strftime('%Y-%m-%d') if self.data_nascimento else None
+            data_nasc_formatada = self.data_nascimento.strftime('%Y-%m-%d') if self.data_nascimento else None
         
         # Converte Decimal para float para ser compatível com JSON
-        renda = float(self.renda_familiar) if self.renda_familiar else 0.0
+            renda = float(self.renda_familiar) if self.renda_familiar else 0.0
 
-        return {
-            'id': self.id,
-            'nomeCompleto': self.nome_completo,
-            'cpf': self.cpf,
-            'dataNascimento': data_nasc_formatada,
-            'sexo': self.sexo,
-            'nis': self.nis,
-            'status': self.status,
+            return {
+                'id': self.id,
+                'nomeCompleto': self.nome_completo,
+                'cpf': self.cpf,
+                'dataNascimento': data_nasc_formatada,
+                'sexo': self.sexo,
+                'nis': self.nis,
+                'status': self.status,
             
-            'ufNaturalidade': self.uf_naturalidade,
-            'naturalidadeCidade': self.naturalidade_cidade,
-            'endereco': self.endereco,
+                'ufNaturalidade': self.uf_naturalidade,
+                'naturalidadeCidade': self.naturalidade_cidade,
+                'endereco': self.endereco,
             
-            'rg': self.rg,
-            'orgaoEmissor': self.orgao_emissor,
-            'ufRg': self.uf_rg,
-            'certidaoFls': self.certidao_fls,
+                'rg': self.rg,
+                'orgaoEmissor': self.orgao_emissor,
+                'ufRg': self.uf_rg,
+                'certidaoFls': self.certidao_fls,
             
-            'nomeResponsavel': self.nome_responsavel,
-            'cpfResponsavel': self.cpf_responsavel,
-            'nisResponsavel': self.nis_responsavel,
-            'rgResponsavel': self.rg_responsavel,
+                'nomeResponsavel': self.nome_responsavel,
+                'cpfResponsavel': self.cpf_responsavel,
+                'nisResponsavel': self.nis_responsavel,
+                'rgResponsavel': self.rg_responsavel,
             
-            'situacao_escolar': self.situacao_escolar,
-            'frequenta_eja': self.frequenta_eja,
-            'serie': self.serie,
-            'eja_semestre': self.eja_semestre,
-            'nome_escola': self.nome_escola,
+                'situacao_escolar': self.situacao_escolar,
+                'frequenta_eja': self.frequenta_eja,
+                'serie': self.serie,
+                'eja_semestre': self.eja_semestre,
+                'nome_escola': self.nome_escola,
             
-            'orgaoDemandante': [o.nome_orgao for o in self.orgaos_demandantes],
-            'orgaoDemandanteOutro': self.orgao_demandante_outro,
-            'crasReferencia': self.cras_referencia,
-            'tecnicoReferencia': self.tecnico_referencia,
-            'nomeEntidade': self.nome_entidade,
-            'enderecoEntidade': self.endereco_entidade,
-            'emailEntidade': self.email_entidade,
-            'telefoneEntidade': self.telefone_entidade,
-            'responsavelPreenchimento': self.responsavel_preenchimento,
+                'orgaoDemandante': [o.nome_orgao for o in self.orgaos_demandantes],
+                'orgaoDemandanteOutro': self.orgao_demandante_outro,
+                'crasReferencia': self.cras_referencia,
+                'tecnicoReferencia': self.tecnico_referencia,
+                'nomeEntidade': self.nome_entidade,
+                'enderecoEntidade': self.endereco_entidade,
+                'emailEntidade': self.email_entidade,
+                'telefoneEntidade': self.telefone_entidade,
+                'responsavelPreenchimento': self.responsavel_preenchimento,
             
-            'chefeFamilia': self.chefe_familia,
-            'chefeFamiliaOutro': self.chefe_familia_outro,
-            'religiaoFamilia': self.religiao_familia,
-            'localTrabalhoFamilia': self.local_trabalho_familia,
-            'rendaFamiliar': renda,
-            'familiaPossuiDeficiencia': self.familia_possui_deficiencia,
-            'deficienteSexo': self.deficiente_sexo,
-            'deficienteFaixaEtaria': self.deficiente_faixa_etaria,
-            'familiares': [{'nome': f.nome, 'parentesco': f.parentesco, 'idade': f.idade} for f in self.familiares],
+                'chefeFamilia': self.chefe_familia,
+                'chefeFamiliaOutro': self.chefe_familia_outro,
+                'religiaoFamilia': self.religiao_familia,
+                'localTrabalhoFamilia': self.local_trabalho_familia,
+                'rendaFamiliar': renda,
+                'familiaPossuiDeficiencia': self.familia_possui_deficiencia,
+                'deficienteSexo': self.deficiente_sexo,
+                'deficienteFaixaEtaria': self.deficiente_faixa_etaria,
+                'familiares': [{'nome': f.nome, 'parentesco': f.parentesco, 'idade': f.idade} for f in self.familiares],
             
-            'medicamentoUso': self.medicamento_uso,
-            'alergiaDescricao': self.alergia_descricao,
-            'tecnicoResponsavel': self.tecnico_responsavel,
-            'responsavelGeral': self.responsavel_geral,
-            'telefoneContato': self.telefone_contato,
-            'bpcDeficienciaEspecificar': self.bpc_deficiencia_especificar,
-            'beneficios': [b.nome_beneficio for b in self.beneficios]
+                'medicamentoUso': self.medicamento_uso,
+                'alergiaDescricao': self.alergia_descricao,
+                'tecnicoResponsavel': self.tecnico_responsavel,
+                'responsavelGeral': self.responsavel_geral,
+                'telefoneContato': self.telefone_contato,
+                'bpcDeficienciaEspecificar': self.bpc_deficiencia_especificar,
+                'beneficios': [b.nome_beneficio for b in self.beneficios]
         }
 
 
@@ -208,6 +208,13 @@ class Familiar(db.Model):
     nome = db.Column(db.String(150))
     parentesco = db.Column(db.String(50))
     idade = db.Column(db.Integer)
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'nome': self.nome,
+            'parentesco': self.parentesco,
+            'idade': self.idade
+        }
 
 class BeneficioParticipante(db.Model):
     __tablename__ = 'beneficios_participante'
@@ -295,19 +302,29 @@ def cadastrar_participante():
     cpf_usuario_logado = get_jwt_identity()
     usuario_logado = Usuario.query.filter_by(cpf=cpf_usuario_logado).first()
 
-    # Tratamento de Data (Evita erro se vier vazio ou formato errado)
+    # 1. Tratamento de Data
     data_nasc = None
     if dados.get('dataNascimento'):
         try:
-            # Tenta converter string 'YYYY-MM-DD' para objeto date
             data_nasc = datetime.strptime(dados.get('dataNascimento'), '%Y-%m-%d').date()
         except ValueError:
-            pass # Se der erro, salva como None ou trate o erro
+            pass 
+
+    # 2. Tratamento Seguro da Renda (Evita crash com R$ ou vírgulas)
+    valor_renda = 0.0
+    if dados.get('rendaFamiliar'):
+        try:
+            # Converte para string, tira R$, tira ponto de milhar, troca vírgula por ponto
+            renda_str = str(dados.get('rendaFamiliar'))
+            renda_limpa = renda_str.replace('R$', '').replace(' ', '').replace('.', '').replace(',', '.')
+            valor_renda = float(renda_limpa)
+        except ValueError:
+            valor_renda = 0.0
 
     try:
         novo_participante = Participante(
             usuario_id=usuario_logado.id if usuario_logado else None,
-            status='pendente', # Começa sempre como pendente
+            status='pendente',
             
             # --- Mapeamento de Campos ---
             nome_completo=dados.get('nomeCompleto'),
@@ -328,8 +345,12 @@ def cadastrar_participante():
             rg_responsavel=dados.get('rgResponsavel'),
             situacao_escolar=dados.get('situacao_escolar'),
             serie=dados.get('serie'),
-            frequenta_eja=(dados.get('frequenta_eja') == 'true'), # Conversão segura
+            
+            # Ajuste aqui conforme seu Front envia ('true', 'sim' ou true)
+            frequenta_eja=(str(dados.get('frequenta_eja')).lower() in ['true', 'sim', '1']),
+            
             eja_semestre=dados.get('eja_semestre'),
+            nome_escola=dados.get('nome_escola'), # Adicionei este campo que faltava no seu snippet
             orgao_demandante_outro=dados.get('orgaoDemandanteOutro'),
             cras_referencia=dados.get('crasReferencia'),
             tecnico_referencia=dados.get('tecnicoReferencia'),
@@ -343,10 +364,9 @@ def cadastrar_participante():
             religiao_familia=dados.get('religiaoFamilia'),
             local_trabalho_familia=dados.get('localTrabalhoFamilia'),
             
-            # Conversão de Número
-            renda_familiar=float(dados.get('rendaFamiliar')) if dados.get('rendaFamiliar') else 0.0,
+            renda_familiar=valor_renda, # Usa o valor tratado acima
             
-            familia_possui_deficiencia=(dados.get('familiaPossuiDeficiencia') == 'true'),
+            familia_possui_deficiencia=(str(dados.get('familiaPossuiDeficiencia')).lower() in ['true', 'sim', '1']),
             deficiente_sexo=dados.get('deficienteSexo'),
             deficiente_faixa_etaria=dados.get('deficienteFaixaEtaria'),
             medicamento_uso=dados.get('medicamentoUso'),
@@ -358,26 +378,40 @@ def cadastrar_participante():
         )
         
         db.session.add(novo_participante)
-        db.session.flush() # Gera o ID para usar nas relações abaixo
+        db.session.flush() # Gera o ID
 
-        # Salvar Listas (Arrays)
+        # Salvar Benefícios
         if dados.get('beneficios'):
             for ben in dados.get('beneficios'):
                 db.session.add(BeneficioParticipante(participante_id=novo_participante.id, nome_beneficio=ben))
         
+        # Salvar Órgãos Demandantes
         if dados.get('orgaoDemandante'):
             for org in dados.get('orgaoDemandante'):
                 db.session.add(OrgaoDemandanteParticipante(participante_id=novo_participante.id, nome_orgao=org))
+
+        # --- CORREÇÃO: Salvar Familiares (Isso estava faltando) ---
+        # Verifica se o frontend enviou 'familyMembers' ou 'familiares' (ajuste conforme o JSON)
+        lista_familiares = dados.get('familyMembers') or dados.get('familiares')
+        if lista_familiares:
+            for fam in lista_familiares:
+                # Só salva se tiver nome preenchido
+                if fam.get('nome'): 
+                    idade_valida = int(fam.get('idade')) if fam.get('idade') else None
+                    db.session.add(Familiar(
+                        participante_id=novo_participante.id, 
+                        nome=fam.get('nome'), 
+                        parentesco=fam.get('parentesco'), 
+                        idade=idade_valida
+                    ))
 
         db.session.commit()
         return jsonify({"msg": "Participante cadastrado com sucesso!", "id": novo_participante.id}), 201
 
     except Exception as e:
         db.session.rollback()
-        print(f"Erro Backend: {e}") # Mostra no terminal do Flask
+        print(f"Erro Backend: {e}")
         return jsonify({"msg": "Erro ao salvar participante.", "erro": str(e)}), 500
-
-
 # 4. DASHBOARD (Dados Agregados)
 @app.route("/api/dashboard", methods=['GET'])
 @jwt_required()
