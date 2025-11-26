@@ -115,6 +115,22 @@ class Participante(db.Model):
     # Relacionamento reverso para saber quem cadastrou
     adicionado_por = db.relationship('Usuario', backref=db.backref('participantes', lazy=True))
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'nomeCompleto': self.nome_completo,
+            'cpf': self.cpf,
+            # Formata a data para string se ela existir
+            'dataNascimento': self.data_nascimento.strftime('%d/%m/%Y') if self.data_nascimento else None,
+            'sexo': self.sexo,
+            'nis': self.nis,
+            'situacao_escolar': self.situacao_escolar,
+            'nome_escola': self.nome_escola,
+            # Converte Decimal para float para ser compatível com JSON
+            'rendaFamiliar': float(self.renda_familiar) if self.renda_familiar else 0.0,
+            'telefoneContato': self.telefone_contato,
+            'status': self.status
+        }
 class Familiar(db.Model):
     __tablename__ = 'familiares'
     id = db.Column(db.Integer, primary_key=True)
@@ -359,6 +375,16 @@ def dashboard():
     except Exception as e:
         print(f"Erro Dashboard: {e}")
         return jsonify({"msg": "Erro ao carregar dashboard", "erro": str(e)}), 500
+
+    # 5. BUSCAR PARTICIPANTE POR ID (Para a página de Perfil)
+
+    # 5. BUSCAR PARTICIPANTE POR ID
+@app.route("/api/participantes/<int:id>", methods=['GET'])
+def get_participante(id):
+    participante = Participante.query.get(id)
+    if participante:
+        return jsonify(participante.to_dict()), 200
+    return jsonify({"msg": "Participante não encontrado"}), 404
 
 if __name__ == '__main__':
     with app.app_context():

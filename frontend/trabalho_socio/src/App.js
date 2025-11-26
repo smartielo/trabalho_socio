@@ -6,6 +6,7 @@ import PageDashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Cadastro from './pages/Cadastro';
 import Creditos from './pages/Creditos';
+import Perfil from './pages/Perfil';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/cadastro" element={<Cadastro />} />
         <Route path="/creditos" element={<Creditos />} />
+        <Route path="/perfil/:id" element={<Perfil />} />
       </Routes>
     </BrowserRouter>
   );

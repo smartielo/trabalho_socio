@@ -43,7 +43,7 @@ const Login = () => {
       if (response.ok) {
         const data = await response.json();
         // Sucesso! Armazene o token e redirecione
-        localStorage.setItem('token', data.token);
+        localStorage.setItem('token', data.access_token); 
         navigate('/dashboard');
       } else {
         // Tenta ler a mensagem de erro do backend
