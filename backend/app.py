@@ -44,7 +44,7 @@ class Usuario(db.Model):
         return {'id': self.id, 'nome': self.nome, 'email': self.email, 'cpf': self.cpf}
 
 class Participante(db.Model):
-    __tablename__ = 'participantes' # CORREÇÃO: Removida a classe duplicada
+    __tablename__ = 'participantes' #CORREÇÃO: Removida a classe duplicada
 
     id = db.Column(db.Integer, primary_key=True)
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id', ondelete='SET NULL'))
