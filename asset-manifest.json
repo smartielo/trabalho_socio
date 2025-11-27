@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.b55ec35f.css",
-    "main.js": "/static/js/main.5f6a98ca.js",
+    "main.js": "/static/js/main.275b8e72.js",
     "static/js/453.7845502b.chunk.js": "/static/js/453.7845502b.chunk.js",
     "static/media/brasao.png": "/static/media/brasao.5cedcc0537f0e1612c9e.png",
     "static/media/coordenadoria-de-extensao.jpg": "/static/media/coordenadoria-de-extensao.a03e8ab1b68e85ad8dc5.jpg",
@@ -9,11 +9,11 @@
     "static/media/instituto.png": "/static/media/instituto.2b0a3ef5bf6e391008d8.png",
     "index.html": "/index.html",
     "main.b55ec35f.css.map": "/static/css/main.b55ec35f.css.map",
-    "main.5f6a98ca.js.map": "/static/js/main.5f6a98ca.js.map",
+    "main.275b8e72.js.map": "/static/js/main.275b8e72.js.map",
     "453.7845502b.chunk.js.map": "/static/js/453.7845502b.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.b55ec35f.css",
-    "static/js/main.5f6a98ca.js"
+    "static/js/main.275b8e72.js"
   ]
 }
