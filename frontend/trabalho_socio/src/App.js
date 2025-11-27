@@ -8,6 +8,9 @@ import Cadastro from './pages/Cadastro';
 import Creditos from './pages/Creditos';
 import Perfil from './pages/Perfil';
 import ListaParticipantes from './pages/ListaParticipantes';
+import ProtectedRoute from './components/ProtectedRoute';
+import PainelUsuario from './pages/PainelUsuario';
+import EditarPerfil from './pages/EditarPerfil';
 
 function App() {
   return (
@@ -22,6 +25,11 @@ function App() {
         <Route path="/creditos" element={<Creditos />} />
         <Route path="/perfil/:id" element={<Perfil />} />
         <Route path="/participantes" element={<ListaParticipantes />} />
+        <Route element={<ProtectedRoute allowedTypes={['Admin', 'Master']} />}></Route>
+        <Route element={<ProtectedRoute allowedTypes={['comum']} />}>
+           <Route path="/painel-usuario" element={<PainelUsuario />} />
+           <Route path="/editar-perfil" element={<EditarPerfil />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );

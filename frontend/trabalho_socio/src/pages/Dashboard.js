@@ -65,32 +65,43 @@ const PageDashboard = () => {
   const handleExportCSV = async () => {
     const token = localStorage.getItem('token');
     try {
-      // 1. Busca a lista completa do backend
+      // 1. Busca todos
       const response = await fetch('http://localhost:5000/api/participantes/todos', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
       if (!response.ok) throw new Error('Erro ao baixar dados');
       
-      const lista = await response.json();
+      const listaCompleta = await response.json();
 
-      if (lista.length === 0) {
+      // --- ALTERAÇÃO: REMOVIDO O FILTRO DE APROVADOS ---
+      // Agora usamos a listaCompleta diretamente
+      if (listaCompleta.length === 0) {
         alert("Nenhum participante para exportar.");
         return;
       }
 
-      // 2. Define o Cabeçalho do CSV
+      // 3. Pega Data e Hora atuais
+      const agora = new Date();
+      const dataHoraGeracao = agora.toLocaleString('pt-BR');
+
+      // 4. Define o Cabeçalho do CSV
       const headers = [
-        "ID", "Nome Completo", "CPF", "Nascimento", "Sexo", "Telefone", 
+        "ID", "Nome Completo", "Status", "CPF", "Nascimento", "Sexo", "Telefone", 
         "Situação Escolar", "Renda Familiar", "Chefe Família"
       ];
 
-      // 3. Converte os dados JSON para linhas de CSV
+      // 5. Monta o CSV com metadados no topo
+      // Adicionei a coluna Status para facilitar a visualização no Excel
       const csvRows = [
-        headers.join(';'), // Usa ponto-e-vírgula para Excel brasileiro reconhecer colunas
-        ...lista.map(p => [
+        `Relatório Geral de Participantes (Todos os Status);;;;;;;;;`, // Título
+        `Gerado em: ${dataHoraGeracao};;;;;;;;;`,       // Data/Hora
+        ``, // Linha em branco
+        headers.join(';'), // Cabeçalho das colunas
+        ...listaCompleta.map(p => [
           p.id,
-          `"${p.nomeCompleto}"`, // Aspas evitam erro se tiver ponto e vírgula no nome
+          `"${p.nomeCompleto}"`,
+          p.status ? p.status.toUpperCase() : 'PENDENTE', // Mostra o status no CSV
           `"${p.cpf}"`,
           p.dataNascimento,
           p.sexo,
@@ -101,14 +112,16 @@ const PageDashboard = () => {
         ].join(';'))
       ];
 
-      // 4. Cria o arquivo e força o download
-      const csvString = "\uFEFF" + csvRows.join('\n'); // \uFEFF é para corrigir acentuação (BOM)
+      // 6. Cria o arquivo e força o download
+      const csvString = "\uFEFF" + csvRows.join('\n');
       const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', 'lista_participantes.csv');
+      
+      const dataArquivo = agora.toISOString().slice(0,10); 
+      link.setAttribute('download', `relatorio_geral_participantes_${dataArquivo}.csv`); // Nome do arquivo atualizado
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

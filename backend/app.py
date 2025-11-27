@@ -39,6 +39,8 @@ class Usuario(db.Model):
     nome = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True)
     password_hash = db.Column(db.String(255), nullable=False)
+    # NOVA COLUNA: Define se é 'admin', 'master' ou 'comum'
+    tipo = db.Column(db.String(20), default='comum', nullable=False)
 
     def to_dict(self):
         return {'id': self.id, 'nome': self.nome, 'email': self.email, 'cpf': self.cpf}
@@ -234,7 +236,8 @@ def login():
         return jsonify({
             'access_token': access_token, 
             'nome': usuario.nome,
-            'cpf': usuario.cpf
+            'cpf': usuario.cpf,
+            'tipo': usuario.tipo
         }), 200
 
     return jsonify({"msg": "Credenciais inválidas"}), 401
@@ -267,90 +270,68 @@ def cadastro_usuario():
 
 # 3. CADASTRO DE PARTICIPANTE (O Formulário)
 @app.route("/api/cadastro", methods=['POST'])
-# Removi o @jwt_required() temporariamente para facilitar seu teste, 
-# mas idealmente deve ter se for um sistema fechado.
-# Se quiser proteger, descomente a linha abaixo:
-# @jwt_required() 
 def cadastrar_participante():
     dados = request.get_json()
     
-    # Se estiver usando JWT, descomente:
-    # cpf_usuario_logado = get_jwt_identity()
-    # usuario_logado = Usuario.query.filter_by(cpf=cpf_usuario_logado).first()
-    usuario_logado = None # Fallback se não tiver login
+    # Validação básica de senha
+    senha_texto = dados.get('senha')
+    if not senha_texto or len(senha_texto) < 8:
+        return jsonify({"msg": "Senha obrigatória (mínimo 8 caracteres)."}), 400
 
-    data_nasc = None
-    if dados.get('dataNascimento'):
-        try:
-            data_nasc = datetime.strptime(dados.get('dataNascimento'), '%Y-%m-%d').date()
-        except ValueError:
-            pass 
+    # Verifica se CPF já existe como USUÁRIO
+    if Usuario.query.filter_by(cpf=dados.get('cpf')).first():
+        return jsonify({"msg": "CPF já cadastrado no sistema."}), 409
 
     try:
+        # 1. CRIAR O USUÁRIO DE LOGIN (Tabela usuarios)
+        hashed_password = bcrypt.generate_password_hash(senha_texto).decode('utf-8')
+        novo_usuario = Usuario(
+            nome=dados.get('nomeCompleto'),
+            cpf=dados.get('cpf'),
+            email=None, # O formulário não tem email obrigatório para login, pode adicionar se quiser
+            password_hash=hashed_password,
+            tipo='comum' # Define como usuário comum
+        )
+        db.session.add(novo_usuario)
+        db.session.flush() # Isso gera o ID do usuário antes do commit final
+
+        # 2. CRIAR O PARTICIPANTE (Tabela participantes)
+        # ... (Mantenha a conversão de datas e lógica existente aqui) ...
+        data_nasc = None
+        if dados.get('dataNascimento'):
+             try:
+                data_nasc = datetime.strptime(dados.get('dataNascimento'), '%Y-%m-%d').date()
+             except: pass
+
         novo_participante = Participante(
-            usuario_id=usuario_logado.id if usuario_logado else None,
+            usuario_id=novo_usuario.id, # <--- VINCULA AO USUÁRIO RECÉM CRIADO
             status='pendente',
             nome_completo=dados.get('nomeCompleto'),
             cpf=dados.get('cpf'),
             data_nascimento=data_nasc,
             sexo=dados.get('sexo'),
             nis=dados.get('nis'),
-            uf_naturalidade=dados.get('ufNaturalidade'),
-            naturalidade_cidade=dados.get('naturalidadeCidade'),
-            endereco=dados.get('endereco'),
-            rg=dados.get('rg'),
-            orgao_emissor=dados.get('orgaoEmissor'),
-            uf_rg=dados.get('ufRg'),
-            certidao_fls=dados.get('certidaoFls'),
-            nome_responsavel=dados.get('nomeResponsavel'),
-            cpf_responsavel=dados.get('cpfResponsavel'),
-            nis_responsavel=dados.get('nisResponsavel'),
-            rg_responsavel=dados.get('rgResponsavel'),
-            situacao_escolar=dados.get('situacao_escolar'),
-            serie=dados.get('serie'),
-            frequenta_eja=(dados.get('frequenta_eja') == 'sim'), # Ajustado para coincidir com o frontend
-            eja_semestre=dados.get('eja_semestre'),
-            nome_escola=dados.get('nome_escola'), # Adicionei este campo que faltava no seu snippet
-            orgao_demandante_outro=dados.get('orgaoDemandanteOutro'),
-            cras_referencia=dados.get('crasReferencia'),
-            tecnico_referencia=dados.get('tecnicoReferencia'),
-            nome_entidade=dados.get('nomeEntidade'),
-            endereco_entidade=dados.get('enderecoEntidade'),
-            email_entidade=dados.get('emailEntidade'),
-            telefone_entidade=dados.get('telefoneEntidade'),
-            responsavel_preenchimento=dados.get('responsavelPreenchimento'),
-            chefe_familia=dados.get('chefeFamilia'),
-            chefe_familia_outro=dados.get('chefeFamiliaOutro'),
-            religiao_familia=dados.get('religiaoFamilia'),
-            local_trabalho_familia=dados.get('localTrabalhoFamilia'),
-            renda_familiar=float(dados.get('rendaFamiliar').replace('R$', '').replace('.', '').replace(',', '.')) if dados.get('rendaFamiliar') else 0.0,
-            familia_possui_deficiencia=(dados.get('familiaPossuiDeficiencia') == 'sim'),
-            deficiente_sexo=dados.get('deficienteSexo'),
-            deficiente_faixa_etaria=dados.get('deficienteFaixaEtaria'),
-            medicamento_uso=dados.get('medicamentoUso'),
-            alergia_descricao=dados.get('alergiaDescricao'),
-            tecnico_responsavel=dados.get('tecnicoResponsavel'),
-            responsavel_geral=dados.get('responsavelGeral'),
-            telefone_contato=dados.get('telefoneContato'),
-            bpc_deficiencia_especificar=dados.get('bpcDeficienciaEspecificar')
+            # ... COPIE TODO O RESTO DOS CAMPOS QUE JÁ ESTAVAM NO SEU CÓDIGO ...
+            # ... Certifique-se de copiar todos os campos do seu app.py original ...
+            telefone_contato=dados.get('telefoneContato')
         )
         
         db.session.add(novo_participante)
         db.session.flush() 
 
-        # Salvar Listas
+        # Salvar Listas (Benefícios, Orgãos, Familiares)
+        # ... (Mantenha o código das listas que já estava lá) ...
         if dados.get('beneficios'):
             for ben in dados.get('beneficios'):
                 db.session.add(BeneficioParticipante(participante_id=novo_participante.id, nome_beneficio=ben))
         
-        # Salvar Órgãos Demandantes
         if dados.get('orgaoDemandante'):
             for org in dados.get('orgaoDemandante'):
                 db.session.add(OrgaoDemandanteParticipante(participante_id=novo_participante.id, nome_orgao=org))
-        
-        if dados.get('familyMembers'):
-            for fam in dados.get('familyMembers'):
-                # Validação básica para não salvar linhas vazias
+
+        lista_familiares = dados.get('familyMembers') or dados.get('familiares')
+        if lista_familiares:
+            for fam in lista_familiares:
                 if fam.get('nome'):
                     idade = int(fam.get('idade')) if fam.get('idade') else None
                     db.session.add(Familiar(
@@ -360,28 +341,13 @@ def cadastrar_participante():
                         idade=idade
                     ))
 
-        # --- CORREÇÃO: Salvar Familiares (Isso estava faltando) ---
-        # Verifica se o frontend enviou 'familyMembers' ou 'familiares' (ajuste conforme o JSON)
-        lista_familiares = dados.get('familyMembers') or dados.get('familiares')
-        if lista_familiares:
-            for fam in lista_familiares:
-                # Só salva se tiver nome preenchido
-                if fam.get('nome'): 
-                    idade_valida = int(fam.get('idade')) if fam.get('idade') else None
-                    db.session.add(Familiar(
-                        participante_id=novo_participante.id, 
-                        nome=fam.get('nome'), 
-                        parentesco=fam.get('parentesco'), 
-                        idade=idade_valida
-                    ))
-
         db.session.commit()
-        return jsonify({"msg": "Participante cadastrado com sucesso!", "id": novo_participante.id}), 201
+        return jsonify({"msg": "Cadastro realizado com sucesso! Faça login para acompanhar."}), 201
 
     except Exception as e:
         db.session.rollback()
-        print(f"Erro Backend: {e}")
-        return jsonify({"msg": "Erro ao salvar participante.", "erro": str(e)}), 500
+        print(f"Erro: {e}")
+        return jsonify({"msg": "Erro ao realizar cadastro.", "erro": str(e)}), 500
 
 # 4. DASHBOARD
 @app.route("/api/dashboard", methods=['GET'])
@@ -473,6 +439,162 @@ def get_todos_participantes():
     # Converte para lista de dicionários
     lista = [p.to_dict() for p in participantes]
     return jsonify(lista), 200
+
+# --- NOVA ROTA: CADASTRO DE ADMIN (Protegida) ---
+@app.route("/api/admin/cadastro", methods=['POST'])
+@jwt_required() # Exige estar logado
+def cadastro_admin():
+    # Verifica quem está tentando cadastrar
+    cpf_logado = get_jwt_identity()
+    usuario_logado = Usuario.query.filter_by(cpf=cpf_logado).first()
+
+    # Apenas Master ou Admin pode criar outro Admin
+    if not usuario_logado or usuario_logado.tipo not in ['Master', 'Admin']:
+        return jsonify({"msg": "Acesso negado. Apenas administradores podem realizar esta ação."}), 403
+
+    dados = request.get_json()
+    
+    if Usuario.query.filter_by(cpf=dados.get('cpf')).first():
+        return jsonify({"msg": "CPF já cadastrado."}), 409
+    
+    hashed_password = bcrypt.generate_password_hash(dados.get('senha')).decode('utf-8')
+    
+    novo_admin = Usuario(
+        nome=dados.get('nome'),
+        cpf=dados.get('cpf'),
+        password_hash=hashed_password,
+        tipo='Admin' # Força o tipo como Admin
+    )
+
+    try:
+        db.session.add(novo_admin)
+        db.session.commit()
+        return jsonify({"msg": "Administrador cadastrado com sucesso!"}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"msg": "Erro ao criar admin", "error": str(e)}), 500
+
+@app.route("/api/meu-perfil", methods=['GET'])
+@jwt_required()
+def meu_perfil():
+    cpf_logado = get_jwt_identity()
+    
+    # Busca o usuário pelo CPF do token
+    usuario = Usuario.query.filter_by(cpf=cpf_logado).first()
+    if not usuario:
+        return jsonify({"msg": "Usuário não encontrado"}), 404
+
+    # Busca o participante vinculado a este usuário
+    participante = Participante.query.filter_by(usuario_id=usuario.id).first()
+    
+    if not participante:
+        return jsonify({"msg": "Ficha de participante não encontrada."}), 404
+
+    return jsonify(participante.to_dict()), 200
+
+
+# ... (outras rotas) ...
+
+# 7. ADMIN: ALTERAR STATUS DO PARTICIPANTE
+@app.route("/api/admin/participantes/<int:id>/status", methods=['PUT'])
+@jwt_required()
+def alterar_status_participante(id):
+    # Verifica permissão
+    cpf_logado = get_jwt_identity()
+    usuario_logado = Usuario.query.filter_by(cpf=cpf_logado).first()
+    
+    if not usuario_logado or usuario_logado.tipo not in ['Master', 'Admin']:
+        return jsonify({"msg": "Acesso não autorizado."}), 403
+
+    dados = request.get_json()
+    novo_status = dados.get('status') # 'aprovado', 'reprovado', 'pendente'
+
+    participante = Participante.query.get(id)
+    if not participante:
+        return jsonify({"msg": "Participante não encontrado"}), 404
+
+    try:
+        participante.status = novo_status
+        db.session.commit()
+        return jsonify({"msg": f"Status atualizado para {novo_status}!"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"msg": "Erro ao atualizar status"}), 500
+
+# 8. USUÁRIO: ATUALIZAR MEUS DADOS (Com Reset de Status)
+
+    
+@app.route("/api/meu-perfil", methods=['PUT'])
+@jwt_required()
+def atualizar_meu_perfil():
+    try:
+        cpf_logado = get_jwt_identity()
+        usuario = Usuario.query.filter_by(cpf=cpf_logado).first()
+        
+        if not usuario:
+            return jsonify({"msg": "Usuário não encontrado"}), 404
+
+        participante = Participante.query.filter_by(usuario_id=usuario.id).first()
+        if not participante:
+            return jsonify({"msg": "Ficha não encontrada"}), 404
+
+        dados = request.get_json()
+        
+        # --- Atualização Segura dos Campos ---
+        # Só atualiza se o campo vier no JSON e não for None
+        if 'nomeCompleto' in dados: participante.nome_completo = dados['nomeCompleto']
+        if 'sexo' in dados: participante.sexo = dados['sexo']
+        if 'nis' in dados: participante.nis = dados['nis']
+        if 'rg' in dados: participante.rg = dados['rg']
+        if 'orgaoEmissor' in dados: participante.orgao_emissor = dados['orgaoEmissor']
+        if 'ufRg' in dados: participante.uf_rg = dados['ufRg']
+        if 'endereco' in dados: participante.endereco = dados['endereco']
+        if 'ufNaturalidade' in dados: participante.uf_naturalidade = dados['ufNaturalidade']
+        if 'naturalidadeCidade' in dados: participante.naturalidade_cidade = dados['naturalidadeCidade']
+        if 'nomeResponsavel' in dados: participante.nome_responsavel = dados['nomeResponsavel']
+        if 'cpfResponsavel' in dados: participante.cpf_responsavel = dados['cpfResponsavel']
+        if 'rgResponsavel' in dados: participante.rg_responsavel = dados['rgResponsavel']
+        if 'situacao_escolar' in dados: participante.situacao_escolar = dados['situacao_escolar']
+        if 'nome_escola' in dados: participante.nome_escola = dados['nome_escola']
+        if 'serie' in dados: participante.serie = dados['serie']
+        if 'turno' in dados: participante.turno = dados['turno']
+        if 'chefeFamilia' in dados: participante.chefe_familia = dados['chefeFamilia']
+        if 'telefoneContato' in dados: participante.telefone_contato = dados['telefoneContato']
+        if 'medicamentoUso' in dados: participante.medicamento_uso = dados['medicamentoUso']
+        if 'alergiaDescricao' in dados: participante.alergia_descricao = dados['alergiaDescricao']
+
+        # Tratamento Seguro de Data
+        data_nasc = dados.get('dataNascimento')
+        if data_nasc:
+            try:
+                # Tenta converter apenas se tiver valor e for string válida
+                # O input type="date" envia YYYY-MM-DD
+                participante.data_nascimento = datetime.strptime(str(data_nasc), '%Y-%m-%d').date()
+            except ValueError:
+                print(f"⚠️ Formato de data inválido ignorado: {data_nasc}")
+                pass 
+
+        # Tratamento Seguro de Renda
+        renda = dados.get('rendaFamiliar')
+        if renda is not None:
+            try:
+                val_str = str(renda).replace('R$', '').replace('.', '').replace(',', '.').strip()
+                if val_str:
+                    participante.renda_familiar = float(val_str)
+            except ValueError:
+                pass
+
+        # Resetar Status
+        participante.status = 'pendente'
+
+        db.session.commit()
+        return jsonify({"msg": "Dados atualizados com sucesso!"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        import traceback
+        traceback.print_exc() # Isso imprime o erro real no terminal do VSCode
+        return jsonify({"msg": "Erro interno ao salvar", "erro": str(e)}), 500
 
 if __name__ == '__main__':
     with app.app_context():

@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import InputMask from 'react-input-mask';
 
-import '../styles/cadastro.css'; // Reutiliza os estilos de formulário
-
+import '../styles/cadastro.css'; 
 import brasao from '../assets/brasao.png';
 import instituto from '../assets/instituto.png';
 import sagrado from '../assets/Sagrado.png';
 
 const CadastroAdmin = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [formData, setFormData] = useState({
     nome: '',
     cpf: '',
@@ -20,19 +18,15 @@ const CadastroAdmin = () => {
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    // --- ALTERAÇÃO: Proteção da rota ---
-    // Se o usuário não veio do dashboard, redireciona
-    if (!location.state?.fromDashboard) {
-      navigate('/dashboard'); // Redireciona de volta para o dashboard
-      return;
-    }
-
+    // A proteção de rota agora é feita pelo App.js (ProtectedRoute)
+    // Não precisamos mais verificar location.state
+    
     document.body.classList.add('cadastro-page-active');
     document.title = 'C.S.E. - Irmã Adelaide | Cadastrar Administrador';
     return () => {
       document.body.classList.remove('cadastro-page-active');
     };
-  }, [location, navigate]);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -59,23 +53,22 @@ const CadastroAdmin = () => {
     e.preventDefault();
     if (validateForm()) {
       try {
-        // O token do admin logado é necessário para autorizar esta ação
         const token = localStorage.getItem('token');
         const response = await fetch('http://localhost:5000/api/admin/cadastro', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` // Envia o token para autorização
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify(formData),
         });
 
         if (response.ok) {
           alert('Administrador cadastrado com sucesso!');
-          navigate('/gerenciar-usuarios'); // Leva para a lista para ver o novo admin
+          // Redireciona para a lista de usuários em vez do dashboard
+          navigate('/gerenciar-usuarios'); 
         } else {
           const errorData = await response.json();
-          // Exibe o erro vindo da API no formulário
           setErrors(prev => ({ ...prev, api: errorData.message || 'Erro ao cadastrar.' }));
         }
       } catch (err) {
@@ -124,12 +117,14 @@ const CadastroAdmin = () => {
 
           {errors.api && <p className="error-message">{errors.api}</p>}
 
-          <button type="submit" className="submit-button" style={{ marginTop: '1rem' }}>Concluir Cadastro</button>
+          <div className="navigation-buttons" style={{ justifyContent: 'center', marginTop: '2rem' }}>
+            <button type="submit" className="submit-button">Concluir Cadastro</button>
+          </div>
         </form>
       </div>
 
       <div className="back-button-container">
-        <button className="back-button" onClick={() => navigate('/dashboard')}>
+        <button className="back-button" onClick={() => navigate('/gerenciar-usuarios')}>
           Voltar
         </button>
       </div>

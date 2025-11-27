@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import InputMask from 'react-input-mask'; // Importação do InputMask
 
-import '../styles/Login.css'; // Estilos específicos do Login
-import '../styles/cadastro.css'; // Reutiliza estilos do cadastro
+import '../styles/Login.css';
+import '../styles/cadastro.css';
 
 import brasao from '../assets/brasao.png';
 import instituto from '../assets/instituto.png';
@@ -24,22 +25,17 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(''); // Limpa erros anteriores
+    setError('');
+
+    // Remove caracteres não numéricos para validação, se necessário
+    // const cpfLimpo = cpf.replace(/\D/g, '');
 
     if (!cpf || !senha) {
       setError('Por favor, preencha o CPF e a senha.');
       return;
     }
 
-    // REATIVADO TEMPORARIAMENTE: Login de admin para criar o primeiro usuário
-    if (cpf === 'admin' && senha === 'admin') {
-      // Não vamos setar token aqui, apenas navegar para o dashboard
-      navigate('/dashboard');
-      return;
-    }
-
     try {
-      // A URL deve corresponder à rota do seu backend para login
       const response = await fetch('http://localhost:5000/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -48,13 +44,22 @@ const Login = () => {
 
       if (response.ok) {
         const data = await response.json();
-        // Sucesso! Armazene o token e redirecione
-        localStorage.setItem('token', data.access_token); 
-        navigate('/dashboard');
+        
+        // Salva token e dados do usuário
+        localStorage.setItem('token', data.access_token);
+        localStorage.setItem('userType', data.tipo); // Salva se é Admin, Master ou Comum
+        localStorage.setItem('userName', data.nome);
+
+        // Redireciona baseado no tipo
+        if (data.tipo === 'Master' || data.tipo === 'Admin') {
+            navigate('/dashboard');
+        } else {
+            // Usuário comum vai para o painel dele
+            navigate('/painel-usuario'); 
+        }
+        
       } else {
-        // Tenta ler a mensagem de erro do backend
         const data = await response.json();
-        // Falha no login
         setError(data.message || 'CPF ou senha inválidos.');
       }
     } catch (err) {
@@ -78,11 +83,30 @@ const Login = () => {
         <form onSubmit={handleLogin}>
           <div className="form-group">
             <label htmlFor="cpf" className="cadastro-label">CPF</label>
-            <input type="text" id="cpf" name="cpf" className="input" placeholder="Digite seu CPF" value={cpf} onChange={(e) => setCpf(e.target.value)} />
+            
+            {/* Input com máscara */}
+            <InputMask 
+                mask="999.999.999-99" 
+                maskChar={null}
+                id="cpf" 
+                name="cpf" 
+                className="input" 
+                placeholder="Digite seu CPF" 
+                value={cpf} 
+                onChange={(e) => setCpf(e.target.value)} 
+            />
           </div>
           <div className="form-group">
             <label htmlFor="senha" className="cadastro-label">Senha</label>
-            <input type="password" id="senha" name="senha" className="input" placeholder="Digite sua senha" value={senha} onChange={(e) => setSenha(e.target.value)} />
+            <input 
+                type="password" 
+                id="senha" 
+                name="senha" 
+                className="input" 
+                placeholder="Digite sua senha" 
+                value={senha} 
+                onChange={(e) => setSenha(e.target.value)} 
+            />
           </div>
           {error && <p className="error-message">{error}</p>}
           <button type="submit" className="submit-button login-button">Entrar</button>
@@ -90,7 +114,6 @@ const Login = () => {
         <p className="signup-link">Não tem uma conta? <Link to="/cadastro">Cadastre-se</Link></p>
       </div>
 
-      {/* --- Botão Voltar (Fora do formulário) --- */}
       <div className="back-button-container">
         <button className="back-button" onClick={() => navigate('/')}>
           Voltar
