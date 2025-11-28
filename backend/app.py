@@ -495,11 +495,12 @@ def meu_perfil():
 
 # ... (outras rotas) ...
 
-# 7. ADMIN: ALTERAR STATUS DO PARTICIPANTE
+# --- SUBSTITUIR NO ARQUIVO backend/app.py ---
+
+# Rota corrigida para STATUS (com print de erro)
 @app.route("/api/admin/participantes/<int:id>/status", methods=['PUT'])
 @jwt_required()
 def alterar_status_participante(id):
-    # Verifica permissão
     cpf_logado = get_jwt_identity()
     usuario_logado = Usuario.query.filter_by(cpf=cpf_logado).first()
     
@@ -507,23 +508,24 @@ def alterar_status_participante(id):
         return jsonify({"msg": "Acesso não autorizado."}), 403
 
     dados = request.get_json()
-    novo_status = dados.get('status') # 'aprovado', 'reprovado', 'pendente'
+    novo_status = dados.get('status') 
 
     participante = Participante.query.get(id)
     if not participante:
         return jsonify({"msg": "Participante não encontrado"}), 404
 
     try:
+        print(f"Tentando alterar status id={id} para {novo_status}") # Log para debug
         participante.status = novo_status
         db.session.commit()
         return jsonify({"msg": f"Status atualizado para {novo_status}!"}), 200
     except Exception as e:
         db.session.rollback()
-        return jsonify({"msg": "Erro ao atualizar status"}), 500
+        print(f"❌ ERRO AO ALTERAR STATUS: {e}") # Isso vai aparecer no seu terminal
+        return jsonify({"msg": "Erro ao atualizar status. Verifique o console do servidor."}), 500
 
-# 8. USUÁRIO: ATUALIZAR MEUS DADOS (Com Reset de Status)
 
-    
+# Rota corrigida para EDIÇÃO DE PERFIL (Mais robusta)
 @app.route("/api/meu-perfil", methods=['PUT'])
 @jwt_required()
 def atualizar_meu_perfil():
@@ -540,51 +542,48 @@ def atualizar_meu_perfil():
 
         dados = request.get_json()
         
-        # --- Atualização Segura dos Campos ---
-        # Só atualiza se o campo vier no JSON e não for None
-        if 'nomeCompleto' in dados: participante.nome_completo = dados['nomeCompleto']
-        if 'sexo' in dados: participante.sexo = dados['sexo']
-        if 'nis' in dados: participante.nis = dados['nis']
-        if 'rg' in dados: participante.rg = dados['rg']
-        if 'orgaoEmissor' in dados: participante.orgao_emissor = dados['orgaoEmissor']
-        if 'ufRg' in dados: participante.uf_rg = dados['ufRg']
-        if 'endereco' in dados: participante.endereco = dados['endereco']
-        if 'ufNaturalidade' in dados: participante.uf_naturalidade = dados['ufNaturalidade']
-        if 'naturalidadeCidade' in dados: participante.naturalidade_cidade = dados['naturalidadeCidade']
-        if 'nomeResponsavel' in dados: participante.nome_responsavel = dados['nomeResponsavel']
-        if 'cpfResponsavel' in dados: participante.cpf_responsavel = dados['cpfResponsavel']
-        if 'rgResponsavel' in dados: participante.rg_responsavel = dados['rgResponsavel']
-        if 'situacao_escolar' in dados: participante.situacao_escolar = dados['situacao_escolar']
-        if 'nome_escola' in dados: participante.nome_escola = dados['nome_escola']
-        if 'serie' in dados: participante.serie = dados['serie']
-        if 'turno' in dados: participante.turno = dados['turno']
-        if 'chefeFamilia' in dados: participante.chefe_familia = dados['chefeFamilia']
-        if 'telefoneContato' in dados: participante.telefone_contato = dados['telefoneContato']
-        if 'medicamentoUso' in dados: participante.medicamento_uso = dados['medicamentoUso']
-        if 'alergiaDescricao' in dados: participante.alergia_descricao = dados['alergiaDescricao']
+        # Só atualiza campos de texto se eles não forem vazios (ou se o campo permitir vazio)
+        if dados.get('nomeCompleto'): participante.nome_completo = dados['nomeCompleto']
+        if dados.get('sexo'): participante.sexo = dados['sexo']
+        if dados.get('nis'): participante.nis = dados['nis']
+        if dados.get('rg'): participante.rg = dados['rg']
+        if dados.get('orgaoEmissor'): participante.orgao_emissor = dados['orgaoEmissor']
+        if dados.get('ufRg'): participante.uf_rg = dados['ufRg']
+        if dados.get('endereco'): participante.endereco = dados['endereco']
+        
+        # Campos opcionais - aceita string vazia
+        participante.uf_naturalidade = dados.get('ufNaturalidade', participante.uf_naturalidade)
+        participante.naturalidade_cidade = dados.get('naturalidadeCidade', participante.naturalidade_cidade)
+        participante.nome_responsavel = dados.get('nomeResponsavel', participante.nome_responsavel)
+        participante.rg_responsavel = dados.get('rgResponsavel', participante.rg_responsavel)
+        participante.nome_escola = dados.get('nome_escola', participante.nome_escola)
+        participante.serie = dados.get('serie', participante.serie)
+        participante.turno = dados.get('turno', participante.turno)
+        participante.telefone_contato = dados.get('telefoneContato', participante.telefone_contato)
+        participante.medicamento_uso = dados.get('medicamentoUso', participante.medicamento_uso)
+        participante.alergia_descricao = dados.get('alergiaDescricao', participante.alergia_descricao)
 
-        # Tratamento Seguro de Data
+        # Tratamento de Data (Evita erro se vier vazio)
         data_nasc = dados.get('dataNascimento')
         if data_nasc:
             try:
-                # Tenta converter apenas se tiver valor e for string válida
-                # O input type="date" envia YYYY-MM-DD
+                # O input date envia YYYY-MM-DD
                 participante.data_nascimento = datetime.strptime(str(data_nasc), '%Y-%m-%d').date()
             except ValueError:
-                print(f"⚠️ Formato de data inválido ignorado: {data_nasc}")
                 pass 
 
-        # Tratamento Seguro de Renda
+        # Tratamento de Renda
         renda = dados.get('rendaFamiliar')
         if renda is not None:
             try:
+                # Remove formatação R$ e converte
                 val_str = str(renda).replace('R$', '').replace('.', '').replace(',', '.').strip()
                 if val_str:
                     participante.renda_familiar = float(val_str)
             except ValueError:
                 pass
 
-        # Resetar Status
+        # Resetar Status ao editar
         participante.status = 'pendente'
 
         db.session.commit()
@@ -593,7 +592,8 @@ def atualizar_meu_perfil():
     except Exception as e:
         db.session.rollback()
         import traceback
-        traceback.print_exc() # Isso imprime o erro real no terminal do VSCode
+        traceback.print_exc()
+        print(f"❌ ERRO AO ATUALIZAR PERFIL: {e}")
         return jsonify({"msg": "Erro interno ao salvar", "erro": str(e)}), 500
 
 if __name__ == '__main__':
