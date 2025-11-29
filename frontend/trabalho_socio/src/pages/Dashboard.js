@@ -62,10 +62,11 @@ const PageDashboard = () => {
   };
 
   // --- NOVA FUNÇÃO: GERAR CSV ---
+  // --- FUNÇÃO ATUALIZADA: GERAR CSV COMPLETO ---
   const handleExportCSV = async () => {
     const token = localStorage.getItem('token');
     try {
-      // 1. Busca todos
+      // 1. Busca todos os participantes
       const response = await fetch('http://localhost:5000/api/participantes/todos', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -74,45 +75,77 @@ const PageDashboard = () => {
       
       const listaCompleta = await response.json();
 
-      // --- ALTERAÇÃO: REMOVIDO O FILTRO DE APROVADOS ---
-      // Agora usamos a listaCompleta diretamente
       if (listaCompleta.length === 0) {
         alert("Nenhum participante para exportar.");
         return;
       }
 
-      // 3. Pega Data e Hora atuais
+      // 2. Pega Data e Hora atuais
       const agora = new Date();
       const dataHoraGeracao = agora.toLocaleString('pt-BR');
 
-      // 4. Define o Cabeçalho do CSV
+      // 3. Define o Cabeçalho do CSV (Adicionando novas colunas)
       const headers = [
-        "ID", "Nome Completo", "Status", "CPF", "Nascimento", "Sexo", "Telefone", 
-        "Situação Escolar", "Renda Familiar", "Chefe Família"
+        "ID", 
+        "Status",
+        "Nome Completo", 
+        "CPF", 
+        "RG", 
+        "NIS", 
+        "Nascimento", 
+        "Sexo", 
+        "Telefone", 
+        "Endereço", 
+        "Cidade", 
+        "UF", 
+        "Nome do Responsável", 
+        "CPF Responsável", 
+        "Situação Escolar", 
+        "Escola", 
+        "Série", 
+        "Turno", 
+        "Renda Familiar", 
+        "Chefe Família", 
+        "Benefícios", 
+        "Medicamentos", 
+        "Alergias"
       ];
 
-      // 5. Monta o CSV com metadados no topo
-      // Adicionei a coluna Status para facilitar a visualização no Excel
+      // 4. Monta o CSV
+      // Nota: As strings com aspas `"${...}"` evitam que vírgulas no texto quebrem as colunas do Excel
       const csvRows = [
-        `Relatório Geral de Participantes (Todos os Status);;;;;;;;;`, // Título
-        `Gerado em: ${dataHoraGeracao};;;;;;;;;`,       // Data/Hora
+        `Relatório Geral de Participantes (Completo);;;;;;;;;;;;;;;;;;;;;;`, // Título (com ; suficientes para cobrir as colunas)
+        `Gerado em: ${dataHoraGeracao};;;;;;;;;;;;;;;;;;;;;;`,
         ``, // Linha em branco
         headers.join(';'), // Cabeçalho das colunas
         ...listaCompleta.map(p => [
           p.id,
+          p.status ? p.status.toUpperCase() : 'PENDENTE',
           `"${p.nomeCompleto}"`,
-          p.status ? p.status.toUpperCase() : 'PENDENTE', // Mostra o status no CSV
           `"${p.cpf}"`,
+          `"${p.rg || ''}"`,
+          `"${p.nis || ''}"`,
           p.dataNascimento,
           p.sexo,
           `"${p.telefoneContato || ''}"`,
+          `"${p.endereco || ''}"`,           // Novo: Endereço
+          `"${p.naturalidadeCidade || ''}"`, // Novo: Cidade
+          `"${p.ufNaturalidade || ''}"`,     // Novo: UF
+          `"${p.nomeResponsavel || ''}"`,    // Novo: Responsável
+          `"${p.cpfResponsavel || ''}"`,     // Novo: CPF Resp.
           p.situacao_escolar,
+          `"${p.nome_escola || ''}"`,        // Novo: Escola
+          `"${p.serie || ''}"`,              // Novo: Série
+          `"${p.turno || ''}"`,              // Novo: Turno
           `"${p.rendaFamiliar}"`,
-          p.chefeFamilia
+          p.chefeFamilia,
+          `"${(p.beneficios || []).join(', ')}"`, // Novo: Lista de Benefícios
+          `"${p.medicamentoUso || ''}"`,          // Novo: Medicamentos
+          `"${p.alergiaDescricao || ''}"`         // Novo: Alergias
         ].join(';'))
       ];
 
-      // 6. Cria o arquivo e força o download
+      // 5. Cria o arquivo e força o download
       const csvString = "\uFEFF" + csvRows.join('\n');
       const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
@@ -121,7 +154,7 @@ const PageDashboard = () => {
       link.href = url;
       
       const dataArquivo = agora.toISOString().slice(0,10); 
-      link.setAttribute('download', `relatorio_geral_participantes_${dataArquivo}.csv`); // Nome do arquivo atualizado
+      link.setAttribute('download', `relatorio_completo_${dataArquivo}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -180,6 +213,9 @@ const PageDashboard = () => {
             <Link to="/cadastro" className="submit-button" style={{ textDecoration: 'none', textAlign: 'center', padding: '10px 15px', fontSize: '0.9rem' }}>
                 + Nova Matrícula
             </Link>
+            <button onClick={() => navigate('/gerenciar-eventos')} className="submit-button" style={{ padding: '10px 15px', fontSize: '0.9rem', backgroundColor: '#6f42c1', borderColor: '#6f42c1' }}>
+            📅 Eventos
+            </button>
             <button onClick={handleLogout} className="submit-button" style={{ padding: '10px 15px', fontSize: '0.9rem', backgroundColor: '#dc3545', borderColor: '#dc3545' }}>
                 Sair
             </button>

@@ -214,6 +214,50 @@ class OrgaoDemandanteParticipante(db.Model):
     participante_id = db.Column(db.Integer, db.ForeignKey('participantes.id', ondelete='CASCADE'), nullable=False)
     nome_orgao = db.Column(db.String(100))
 
+
+# 1º: A Tabela precisa vir ANTES
+inscricoes_eventos = db.Table('inscricoes_eventos',
+    db.Column('participante_id', db.Integer, db.ForeignKey('participantes.id'), primary_key=True),
+    db.Column('evento_id', db.Integer, db.ForeignKey('eventos.id'), primary_key=True),
+    db.Column('data_inscricao', db.DateTime, default=datetime.utcnow)
+)
+class Evento(db.Model):
+    __tablename__ = 'eventos'
+    id = db.Column(db.Integer, primary_key=True)
+    titulo = db.Column(db.String(150), nullable=False)
+    descricao = db.Column(db.Text)
+    data_inicio = db.Column(db.DateTime, nullable=False)
+    data_fim = db.Column(db.DateTime)
+    local = db.Column(db.String(150))
+    categoria = db.Column(db.String(50))
+    imagem_url = db.Column(db.String(255))
+    
+    # Aqui usamos a tabela 'inscricoes_eventos' que foi criada acima
+    participantes = db.relationship('Participante', secondary=inscricoes_eventos, lazy='subquery',
+        backref=db.backref('eventos', lazy=True))
+
+    def to_dict(self, participante_logado_id=None):
+        inscrito = False
+        if participante_logado_id:
+            for p in self.participantes:
+                if p.id == participante_logado_id:
+                    inscrito = True
+                    break
+        
+        return {
+            'id': self.id,
+            'titulo': self.titulo,
+            'descricao': self.descricao,
+            'data_inicio': self.data_inicio.strftime('%Y-%m-%dT%H:%M'),
+            'data_fim': self.data_fim.strftime('%Y-%m-%dT%H:%M') if self.data_fim else '',
+            'local': self.local,
+            'categoria': self.categoria,
+            'imagem_url': self.imagem_url,
+            'inscrito': inscrito,
+            'total_inscritos': len(self.participantes),
+            'participantes_lista': [{'id': p.id, 'nome': p.nome_completo} for p in self.participantes]
+        }
+
 # ==============================================================================
 # ROTAS (API)
 # ==============================================================================
@@ -595,6 +639,119 @@ def atualizar_meu_perfil():
         traceback.print_exc()
         print(f"❌ ERRO AO ATUALIZAR PERFIL: {e}")
         return jsonify({"msg": "Erro interno ao salvar", "erro": str(e)}), 500
+    
+# ==============================================================================
+# ROTAS DE EVENTOS
+# ==============================================================================
+
+# 1. ADMIN: CRUD de Eventos
+@app.route("/api/admin/eventos", methods=['GET', 'POST'])
+@jwt_required()
+def gerenciar_eventos():
+    # Verifica permissão
+    cpf_logado = get_jwt_identity()
+    usuario = Usuario.query.filter_by(cpf=cpf_logado).first()
+    if not usuario or usuario.tipo not in ['Master', 'Admin']:
+        return jsonify({"msg": "Acesso não autorizado."}), 403
+
+    if request.method == 'GET':
+        eventos = Evento.query.order_by(Evento.data_inicio.desc()).all()
+        return jsonify([e.to_dict() for e in eventos]), 200
+
+    if request.method == 'POST':
+        dados = request.get_json()
+        try:
+            novo_evento = Evento(
+                titulo=dados.get('titulo'),
+                descricao=dados.get('descricao'),
+                local=dados.get('local'),
+                categoria=dados.get('categoria'),
+                imagem_url=dados.get('imagem_url'),
+                data_inicio=datetime.strptime(dados.get('data_inicio'), '%Y-%m-%dT%H:%M'),
+                data_fim=datetime.strptime(dados.get('data_fim'), '%Y-%m-%dT%H:%M') if dados.get('data_fim') else None
+            )
+            db.session.add(novo_evento)
+            db.session.commit()
+            return jsonify({"msg": "Evento criado com sucesso!"}), 201
+        except Exception as e:
+            return jsonify({"msg": "Erro ao criar evento", "erro": str(e)}), 500
+
+@app.route("/api/admin/eventos/<int:id>", methods=['PUT', 'DELETE'])
+@jwt_required()
+def manipular_evento(id):
+    # Verifica permissão
+    cpf_logado = get_jwt_identity()
+    usuario = Usuario.query.filter_by(cpf=cpf_logado).first()
+    if not usuario or usuario.tipo not in ['Master', 'Admin']:
+        return jsonify({"msg": "Acesso não autorizado."}), 403
+
+    evento = Evento.query.get(id)
+    if not evento:
+        return jsonify({"msg": "Evento não encontrado"}), 404
+
+    if request.method == 'DELETE':
+        db.session.delete(evento)
+        db.session.commit()
+        return jsonify({"msg": "Evento removido!"}), 200
+
+    if request.method == 'PUT':
+        dados = request.get_json()
+        try:
+            evento.titulo = dados.get('titulo')
+            evento.descricao = dados.get('descricao')
+            evento.local = dados.get('local')
+            evento.categoria = dados.get('categoria')
+            evento.imagem_url = dados.get('imagem_url')
+            if dados.get('data_inicio'):
+                evento.data_inicio = datetime.strptime(dados.get('data_inicio'), '%Y-%m-%dT%H:%M')
+            if dados.get('data_fim'):
+                evento.data_fim = datetime.strptime(dados.get('data_fim'), '%Y-%m-%dT%H:%M')
+            
+            db.session.commit()
+            return jsonify({"msg": "Evento atualizado!"}), 200
+        except Exception as e:
+            return jsonify({"msg": "Erro ao atualizar", "erro": str(e)}), 500
+
+# 2. USUÁRIO COMUM: Listar Eventos e Inscrever-se
+@app.route("/api/eventos", methods=['GET'])
+@jwt_required()
+def listar_eventos_usuario():
+    cpf_logado = get_jwt_identity()
+    usuario = Usuario.query.filter_by(cpf=cpf_logado).first()
+    participante = Participante.query.filter_by(usuario_id=usuario.id).first()
+    
+    pid = participante.id if participante else None
+
+    eventos = Evento.query.order_by(Evento.data_inicio.asc()).all()
+    # Passa o ID do participante para saber se ele já está inscrito
+    return jsonify([e.to_dict(participante_logado_id=pid) for e in eventos]), 200
+
+@app.route("/api/eventos/<int:id>/toggle-inscricao", methods=['POST'])
+@jwt_required()
+def toggle_inscricao(id):
+    cpf_logado = get_jwt_identity()
+    usuario = Usuario.query.filter_by(cpf=cpf_logado).first()
+    participante = Participante.query.filter_by(usuario_id=usuario.id).first()
+
+    if not participante:
+        return jsonify({"msg": "Você precisa ter uma ficha de participante aprovada para se inscrever."}), 400
+
+    evento = Evento.query.get(id)
+    if not evento:
+        return jsonify({"msg": "Evento não encontrado"}), 404
+
+    # Verifica se já está na lista
+    if participante in evento.participantes:
+        evento.participantes.remove(participante)
+        msg = "Inscrição cancelada."
+        inscrito = False
+    else:
+        evento.participantes.append(participante)
+        msg = "Inscrição realizada com sucesso!"
+        inscrito = True
+
+    db.session.commit()
+    return jsonify({"msg": msg, "inscrito": inscrito}), 200
 
 if __name__ == '__main__':
     with app.app_context():

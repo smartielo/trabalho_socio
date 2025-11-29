@@ -11,6 +11,8 @@ import ListaParticipantes from './pages/ListaParticipantes';
 import ProtectedRoute from './components/ProtectedRoute';
 import PainelUsuario from './pages/PainelUsuario';
 import EditarPerfil from './pages/EditarPerfil';
+import GerenciarUsuarios from './pages/GerenciarUsuarios';
+import GerenciarEventos from './pages/GerenciarEventos';
 
 function App() {
   return (
@@ -25,7 +27,10 @@ function App() {
         <Route path="/creditos" element={<Creditos />} />
         <Route path="/perfil/:id" element={<Perfil />} />
         <Route path="/participantes" element={<ListaParticipantes />} />
-        <Route element={<ProtectedRoute allowedTypes={['Admin', 'Master']} />}></Route>
+        <Route element={<ProtectedRoute allowedTypes={['Admin', 'Master']} />}>
+          <Route path="/gerenciar-usuarios" element={<GerenciarUsuarios />} />
+          <Route path="/gerenciar-eventos" element={<GerenciarEventos />} />
+        </Route>
         <Route element={<ProtectedRoute allowedTypes={['comum']} />}>
            <Route path="/painel-usuario" element={<PainelUsuario />} />
            <Route path="/editar-perfil" element={<EditarPerfil />} />
