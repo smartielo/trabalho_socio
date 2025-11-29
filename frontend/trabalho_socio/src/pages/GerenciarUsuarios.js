@@ -9,6 +9,8 @@ import brasao from '../assets/brasao.png';
 import instituto from '../assets/instituto.png';
 import sagrado from '../assets/Sagrado.png';
 
+import Loading from '../components/Loading';
+
 const GerenciarUsuarios = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
@@ -112,7 +114,7 @@ const GerenciarUsuarios = () => {
             </div>
         )}
 
-        {loading && <p style={{ color: 'white', textAlign: 'center' }}>Carregando...</p>}
+        {loading && <p style={{ color: 'white', textAlign: 'center' }}>if (loading) return <Loading /></p>}
 
         <div className="user-list">
           {users.map(user => {

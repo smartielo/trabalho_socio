@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../styles/dashboard.css';
 import '../styles/cadastro.css';
+import Loading from '../components/Loading';
 
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { Doughnut, Bar } from 'react-chartjs-2';
@@ -134,7 +135,7 @@ const PageDashboard = () => {
     }
   };
 
-  if (loading && !dashboardData) return <div className="dashboard-container"><h1 style={{color:'#fff'}}>Carregando...</h1></div>;
+  if (loading && !dashboardData) return <div className="dashboard-container"><h1 style={{color:'#fff'}}>if (loading) return <Loading /></h1></div>;
   if (error) return <div className="dashboard-container"><h1 style={{color:'#fff'}}>{error}</h1></div>;
 
   const doughnutData = {

@@ -8,12 +8,14 @@ from datetime import timedelta, datetime
 from sqlalchemy import func, or_
 from dotenv import load_dotenv
 
+# Carrega o arquivo .env
 load_dotenv()
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'chave-secreta-super-segura-trocar-em-prod')
+# Usa as variáveis do .env (ou valor padrão se não achar)
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'fallback_secret_key')
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=8)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'mysql+pymysql://root:root@localhost:3306/socioeducativo_db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -34,15 +36,8 @@ class Usuario(db.Model):
     tipo = db.Column(db.String(20), default='comum', nullable=False)
 
     def to_dict(self):
-        return {
-            'id': self.id, 
-            'nome': self.nome, 
-            'email': self.email, 
-            'cpf': self.cpf,
-            'tipo': self.tipo  # <--- CORREÇÃO: Faltava este campo aqui!
-        }
+        return {'id': self.id, 'nome': self.nome, 'email': self.email, 'cpf': self.cpf, 'tipo': self.tipo}
 
-# Solicitações de Reset de Senha
 class ResetRequest(db.Model):
     __tablename__ = 'reset_requests'
     id = db.Column(db.Integer, primary_key=True)
@@ -77,6 +72,7 @@ class Evento(db.Model):
     local = db.Column(db.String(150))
     categoria = db.Column(db.String(50))
     imagem_url = db.Column(db.String(255))
+    responsavel = db.Column(db.String(100)) # NOVO CAMPO
     
     participantes = db.relationship('Participante', secondary=inscricoes_eventos, lazy='subquery',
         backref=db.backref('eventos', lazy=True))
@@ -98,9 +94,10 @@ class Evento(db.Model):
             'local': self.local,
             'categoria': self.categoria,
             'imagem_url': self.imagem_url,
+            'responsavel': self.responsavel or 'Não informado', # NOVO
             'inscrito': inscrito,
             'total_inscritos': len(self.participantes),
-            'participantes_lista': [{'id': p.id, 'nome': p.nome_completo} for p in self.participantes]
+            'participantes_lista': [{'id': p.id, 'nome': p.nome_completo, 'rg': p.rg} for p in self.participantes] # Adicionei RG para a lista de presença
         }
 
 class Participante(db.Model):
@@ -252,17 +249,15 @@ def request_reset_password():
     cpf = dados.get('cpf')
     usuario = Usuario.query.filter_by(cpf=cpf).first()
     
-    if not usuario:
-        return jsonify({"msg": "CPF não encontrado."}), 404
+    if not usuario: return jsonify({"msg": "CPF não encontrado."}), 404
 
     existe = ResetRequest.query.filter_by(usuario_id=usuario.id, status='pendente').first()
-    if existe:
-        return jsonify({"msg": "Já existe uma solicitação pendente para este CPF."}), 409
+    if existe: return jsonify({"msg": "Já existe uma solicitação pendente."}), 409
 
     novo_pedido = ResetRequest(usuario_id=usuario.id)
     db.session.add(novo_pedido)
     db.session.commit()
-    return jsonify({"msg": "Solicitação enviada! Aguarde a aprovação do administrador."}), 201
+    return jsonify({"msg": "Solicitação enviada! Aguarde a aprovação."}), 201
 
 @app.route("/api/admin/reset-requests", methods=['GET'])
 @jwt_required()
@@ -285,7 +280,6 @@ def action_reset_request(id):
 
     dados = request.get_json()
     acao = dados.get('acao')
-    
     pedido = ResetRequest.query.get(id)
     if not pedido: return jsonify({"msg": "Pedido não encontrado"}), 404
 
@@ -377,7 +371,6 @@ def cadastrar_participante():
         return jsonify({"msg": "Cadastro realizado!"}), 201
     except Exception as e:
         db.session.rollback()
-        print(e)
         return jsonify({"msg": "Erro ao realizar cadastro.", "erro": str(e)}), 500
 
 @app.route("/api/dashboard", methods=['GET'])
@@ -413,7 +406,6 @@ def dashboard():
             'publicoAlvoData': publico_alvo_data
         }), 200
     except Exception as e:
-        print(e)
         return jsonify({"msg": "Erro", "erro": str(e)}), 500
 
 @app.route("/api/participantes/todos", methods=['GET'])
@@ -514,6 +506,7 @@ def eventos():
         local=d.get('local'), 
         categoria=d.get('categoria'), 
         imagem_url=d.get('imagem_url'),
+        responsavel=d.get('responsavel'), # NOVO
         data_inicio=datetime.strptime(d.get('data_inicio'), '%Y-%m-%dT%H:%M')
     )
     if d.get('data_fim'): ne.data_fim = datetime.strptime(d.get('data_fim'), '%Y-%m-%dT%H:%M')
@@ -534,14 +527,15 @@ def manipular_evento(id):
         return jsonify({"msg": "Evento removido!"}), 200
 
     if request.method == 'PUT':
-        dados = request.get_json()
-        e.titulo = dados.get('titulo')
-        e.descricao = dados.get('descricao')
-        e.local = dados.get('local')
-        e.categoria = dados.get('categoria')
-        e.imagem_url = dados.get('imagem_url')
-        if dados.get('data_inicio'): e.data_inicio = datetime.strptime(dados.get('data_inicio'), '%Y-%m-%dT%H:%M')
-        if dados.get('data_fim'): e.data_fim = datetime.strptime(dados.get('data_fim'), '%Y-%m-%dT%H:%M')
+        d = request.get_json()
+        e.titulo = d.get('titulo')
+        e.descricao = d.get('descricao')
+        e.local = d.get('local')
+        e.categoria = d.get('categoria')
+        e.imagem_url = d.get('imagem_url')
+        e.responsavel = d.get('responsavel') # NOVO
+        if d.get('data_inicio'): e.data_inicio = datetime.strptime(d.get('data_inicio'), '%Y-%m-%dT%H:%M')
+        if d.get('data_fim'): e.data_fim = datetime.strptime(d.get('data_fim'), '%Y-%m-%dT%H:%M')
         db.session.commit()
         return jsonify({"msg": "Evento atualizado!"}), 200
 

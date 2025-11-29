@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Importa o hook para navegação
-import '../styles/cadastro.css'; // Importa o CSS específico do formulário
+import { useNavigate } from 'react-router-dom'; 
+import { toast } from 'react-toastify'; // IMPORTANTE: Toastify
+import '../styles/cadastro.css'; 
 import brasao from '../assets/brasao.png';
 import instituto from '../assets/instituto.png';
 import sagrado from '../assets/Sagrado.png';
-import InputMask from 'react-input-mask'; // Importa a biblioteca de máscara de input
-import UfSelect from '../components/UfSelect'; // Importa o novo componente
+import InputMask from 'react-input-mask'; 
+import UfSelect from '../components/UfSelect'; 
 
 const Cadastro = () => {
-  const navigate = useNavigate(); // Instancia o hook de navegação
-  // Estado para controlar os valores do formulário (opcional por enquanto, mas boa prática)
+  const navigate = useNavigate(); 
   const [formData, setFormData] = useState({
     ufNaturalidade: '',
     ufRg: '',
@@ -35,7 +35,6 @@ const Cadastro = () => {
     emailEntidade: '',
     telefoneEntidade: '',
     responsavelPreenchimento: '',
-    // Novos campos da família
     chefeFamilia: '',
     chefeFamiliaOutro: '',
     religiaoFamilia: '',
@@ -44,94 +43,60 @@ const Cadastro = () => {
     familiaPossuiDeficiencia: '',
     deficienteSexo: '',
     deficienteFaixaEtaria: '',
-    // Novos campos de Saúde e Responsáveis
     medicamentoUso: '',
     alergiaDescricao: '',
     tecnicoResponsavel: '',
     responsavelGeral: '',
     telefoneContato: '',
-    // Campos para a nova etapa de senha
     senha: '',
     confirmarSenha: '',
   });
 
-  // Estado para controlar a visibilidade do campo "tempo fora da escola"
   const [showTempoForaEscola, setShowTempoForaEscola] = useState(false);
-
-  // Estado para controlar a visibilidade dos detalhes do EJA/CEJA
   const [showEjaDetails, setShowEjaDetails] = useState(false);
-
-  // Estado para controlar a visibilidade do campo "Outro" de Órgão Demandante
   const [showOrgaoOutro, setShowOrgaoOutro] = useState(false);
-
-  // Estado para controlar a visibilidade do input de BPC Deficiência
   const [showBpcDeficienciaInput, setShowBpcDeficienciaInput] = useState(false);
-
-  // Estado para a lista dinâmica de membros da família
   const [familyMembers, setFamilyMembers] = useState([{ nome: '', parentesco: '', idade: '' }]);
-
-  // Estados para os novos campos condicionais
   const [showChefeOutroInput, setShowChefeOutroInput] = useState(false);
   const [showDeficienciaDetails, setShowDeficienciaDetails] = useState(false);
-
-  // Estado para armazenar os erros de validação
   const [errors, setErrors] = useState({});
-
-  // Estado para controlar a etapa atual do formulário
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
 
-  // Efeito para controlar o estilo do body e permitir a rolagem
   useEffect(() => {
-    // Adiciona a classe ao body quando o componente é montado
     document.body.classList.add('cadastro-page-active');
-
-    // Função de limpeza: remove a classe quando o componente é desmontado
     return () => {
       document.body.classList.remove('cadastro-page-active');
     };
-  }, []); // O array vazio garante que isso rode apenas uma vez (montagem/desmontagem)
+  }, []);
 
-  // Função genérica para lidar com inputs de texto simples
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Função para garantir que apenas números sejam inseridos nos campos designados
   const handleNumericInputChange = (e) => {
     const { name, value } = e.target;
-    const numericValue = value.replace(/[^0-9]/g, ''); // Remove qualquer caractere que não seja um número
+    const numericValue = value.replace(/[^0-9]/g, '');
     setFormData(prev => ({ ...prev, [name]: numericValue }));
   };
 
-  // Função para formatar o número de telefone com máscara
   const handlePhoneInputChange = (e) => {
     const { name, value } = e.target;
-    // Remove tudo que não for dígito
     let numericValue = value.replace(/\D/g, '');
-
-    // Limita a 11 dígitos (DDD + 9 dígitos)
     numericValue = numericValue.slice(0, 11);
-
-    // Aplica a máscara
     if (numericValue.length > 10) {
-      // (XX) XXXXX-XXXX
       numericValue = numericValue.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
     } else if (numericValue.length > 6) {
-      // (XX) XXXX-XXXX
       numericValue = numericValue.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
     } else if (numericValue.length > 2) {
-      // (XX) XXXX
       numericValue = numericValue.replace(/^(\d{2})(\d{0,4}).*/, '($1) $2');
     } else if (numericValue.length > 0) {
       numericValue = numericValue.replace(/^(\d*)/, '($1');
     }
-
     setFormData(prev => ({ ...prev, [name]: numericValue }));
   };
 
-  // Função genérica para lidar com checkboxes que atualizam um array no estado
   const handleCheckboxChange = (e) => {
     const { name, value, checked } = e.target;
     setFormData(prev => {
@@ -158,7 +123,6 @@ const Cadastro = () => {
     setShowEjaDetails(value === 'sim');
   };
 
-  // Funções para gerenciar a lista de membros da família
   const handleFamilyMemberChange = (index, event) => {
     const { name, value } = event.target;
     const updatedMembers = [...familyMembers];
@@ -175,29 +139,22 @@ const Cadastro = () => {
     setFamilyMembers(updatedMembers);
   };
 
-  // Função para formatar a renda familiar como moeda (R$)
   const handleRendaInputChange = (e) => {
     const { name, value } = e.target;
     let numericValue = value.replace(/\D/g, '');
-
     if (numericValue === '') {
       setFormData(prev => ({ ...prev, [name]: '' }));
       return;
     }
-
-    // Formata para o padrão BRL (ex: 123456 -> R$ 1.234,56)
     const formattedValue = new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
     }).format(numericValue / 100);
-
     setFormData(prev => ({ ...prev, [name]: formattedValue }));
   };
 
-  // Pega a data atual para exibir no final do formulário
   const dataAtual = new Date().toLocaleDateString('pt-BR');
 
-  // Função para validar o formulário
   const validateStep = (step) => {
     const newErrors = {};
     if (step === 1) {
@@ -210,7 +167,6 @@ const Cadastro = () => {
       if (!formData.rgResponsavel) newErrors.rgResponsavel = 'O RG do responsável é obrigatório.';
       if (!formData.cpfResponsavel) newErrors.cpfResponsavel = 'O CPF do responsável é obrigatório.';
     }
-    // Adiciona validação para a nova etapa 4
     if (step === 4) {
       if (!formData.senha) {
         newErrors.senha = 'A senha é obrigatória.';
@@ -221,17 +177,22 @@ const Cadastro = () => {
         newErrors.confirmarSenha = 'As senhas não coincidem.';
       }
     }
-    // Adicione validações para os passos 2 e 3 aqui, se necessário
 
     setErrors(newErrors);
+    
+    // Se houver erros, exibe um toast genérico
+    if (Object.keys(newErrors).length > 0) {
+        toast.warn("Por favor, corrija os campos destacados antes de continuar.");
+    }
+    
     return Object.keys(newErrors).length === 0;
   };
 
-  // Funções para navegar entre as etapas
   const nextStep = () => {
     if (validateStep(currentStep)) {
       if (currentStep < totalSteps) {
         setCurrentStep(prev => prev + 1);
+        window.scrollTo(0, 0); // Sobe a tela ao mudar de passo
       }
     }
   };
@@ -239,20 +200,19 @@ const Cadastro = () => {
   const prevStep = () => {
     if (currentStep > 1) {
       setCurrentStep(prev => prev - 1);
+      window.scrollTo(0, 0);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Valida a última etapa antes de submeter
     const isValid = validateStep(currentStep);
 
     if (isValid) {
       const fullFormData = { ...formData, familyMembers };
       
       try {
-        // A URL deve corresponder à rota do seu backend para cadastro
         const response = await fetch('http://localhost:5000/api/cadastro', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -260,18 +220,17 @@ const Cadastro = () => {
         });
 
         if (response.ok) {
-          alert('Cadastro realizado com sucesso!');
-          navigate('/login'); // Redireciona para a página de login após o sucesso
+          toast.success('Cadastro realizado com sucesso! Faça login para continuar.');
+          setTimeout(() => navigate('/login'), 2000); // Espera 2s para o usuário ler o toast
         } else {
           const errorData = await response.json();
-          alert(`Falha no cadastro: ${errorData.message || 'Erro desconhecido.'}`);
+          toast.error(`Falha no cadastro: ${errorData.message || 'Erro desconhecido.'}`);
         }
       } catch (err) {
-        alert('Falha ao conectar com o servidor. Tente novamente mais tarde.');
+        toast.error('Falha ao conectar com o servidor. Tente novamente mais tarde.');
       }
     }
   };
-
 
   return (
     <>
@@ -287,18 +246,20 @@ const Cadastro = () => {
 
         <div className="cadastro-form-container">
 
-          <h1 className="cadastro-title">Cadastro</h1>
+          <h1 className="cadastro-title">Ficha de Inscrição</h1>
 
-          {/* Indicador de Etapas */}
           <div className="step-indicator">
             <p>Passo {currentStep} de {totalSteps}</p>
+            {/* Barra de progresso visual opcional */}
+            <div style={{width: '100%', height: '4px', background: '#555', marginTop: '5px', borderRadius: '2px'}}>
+                <div style={{width: `${(currentStep/totalSteps)*100}%`, height: '100%', background: '#FEBF00', borderRadius: '2px', transition: 'width 0.3s'}}></div>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit}>
 
           {/* --- PASSO 1: IDENTIFICAÇÃO --- */}
           {currentStep === 1 && ( <>
-            {/* --- Público Alvo --- */}
             <div className="form-group">
               <label className="cadastro-label">Público Alvo</label>
               <div className="radio-group-horizontal">
@@ -311,7 +272,6 @@ const Cadastro = () => {
               </div>
             </div>
 
-            {/* --- Dados Pessoais --- */}
             <div className="form-group">
               <label htmlFor="nomeCompleto" className="cadastro-label">Nome Completo</label>
             <input type="text" id="nomeCompleto" name="nomeCompleto" className={`input ${errors.nomeCompleto ? 'error' : ''}`} placeholder="Digite o nome completo" value={formData.nomeCompleto} onChange={handleChange} />
@@ -361,19 +321,18 @@ const Cadastro = () => {
             <input type="text" id="endereco" name="endereco" className="input" placeholder="Rua, número, bairro, CEP" />
           </div>
 
-          {/* --- Documentos --- */}
           <div className="form-group-row">
             <div className="form-group">
               <label htmlFor="rg" className="cadastro-label">RG</label>
               <InputMask
-                mask="99.999.999-*" // Máscara para RG
-                maskChar={null} // Remove o preenchimento da máscara
+                mask="99.999.999-*" 
+                maskChar={null} 
                 id="rg"
                 name="rg"
                 className={`input ${errors.rg ? 'error' : ''}`}
                 placeholder="Apenas números"
                 value={formData.rg}
-                onChange={handleChange} // Usar o handleChange genérico
+                onChange={handleChange} 
               />
               {errors.rg && <p className="error-message">{errors.rg}</p>}
             </div>
@@ -390,22 +349,20 @@ const Cadastro = () => {
           <div className="form-group">
             <label htmlFor="cpf" className="cadastro-label">CPF</label>
             <InputMask
-              mask="999.999.999-99" // Máscara para CPF
-              maskChar={null} // Remove o preenchimento da máscara
+              mask="999.999.999-99" 
+              maskChar={null} 
               id="cpf"
               name="cpf"
               className={`input ${errors.cpf ? 'error' : ''}`}
               placeholder="Apenas números"
               value={formData.cpf}
-              onChange={handleChange} // Usar o handleChange genérico
+              onChange={handleChange} 
             />
             {errors.cpf && <p className="error-message">{errors.cpf}</p>}
           </div>
 
-          {/* --- Divisor --- */}
           <hr className="form-divider" />
 
-          {/* --- Certidão de Nascimento --- */}
           <h2 className="form-section-title">Certidão de Nascimento</h2>
           <div className="form-group-row">
             <div className="form-group">
@@ -422,10 +379,8 @@ const Cadastro = () => {
             </div>
           </div>
 
-          {/* --- Divisor --- */}
           <hr className="form-divider" />
 
-          {/* --- Responsável Legal --- */}
           <h2 className="form-section-title">Responsável Legal</h2>
 
           <div className="form-group">
@@ -443,14 +398,14 @@ const Cadastro = () => {
             <div className="form-group">
               <label htmlFor="rgResponsavel" className="cadastro-label">RG</label>
               <InputMask
-                mask="99.999.999-9" // Máscara para RG
-                maskChar={null} // Remove o preenchimento da máscara
+                mask="99.999.999-9" 
+                maskChar={null} 
                 id="rgResponsavel"
                 name="rgResponsavel"
                 className={`input ${errors.rgResponsavel ? 'error' : ''}`}
                 placeholder="Apenas números"
                 value={formData.rgResponsavel}
-                onChange={handleChange} // Usar o handleChange genérico
+                onChange={handleChange} 
               />
               {errors.rgResponsavel && <p className="error-message">{errors.rgResponsavel}</p>}
             </div>
@@ -467,26 +422,21 @@ const Cadastro = () => {
           <div className="form-group">
             <label htmlFor="cpfResponsavel" className="cadastro-label">CPF</label>
             <InputMask
-              mask="999.999.999-99" // Máscara para CPF
-              maskChar={null} // Remove o preenchimento da máscara
+              mask="999.999.999-99" 
+              maskChar={null} 
               id="cpfResponsavel"
               name="cpfResponsavel"
               className={`input ${errors.cpfResponsavel ? 'error' : ''}`}
               placeholder="Apenas números"
               value={formData.cpfResponsavel}
-              onChange={handleChange} // Usar o handleChange genérico
+              onChange={handleChange} 
             />
             {errors.cpfResponsavel && <p className="error-message">{errors.cpfResponsavel}</p>}
           </div>
           </>)}
 
-
-          {/* --- PASSO 2: CONTEXTO SOCIAL --- */}
           {currentStep === 2 && ( <>
-            {/* --- Divisor --- */}
             <hr className="form-divider" />
-  
-            {/* --- Situação Escolar --- */}
             <h2 className="form-section-title">Situação Escolar Atual</h2>
             <div className="form-group">
               <div className="radio-group-horizontal">
@@ -508,7 +458,6 @@ const Cadastro = () => {
             </div>
           )}
 
-          {/* --- Dados Escolares (só aparece se frequenta a escola) --- */}
           {formData.situacao_escolar === 'frequenta' && (
             <>
               <hr className="form-divider" />
@@ -548,7 +497,6 @@ const Cadastro = () => {
                 </div>
               )}
 
-              {/* --- Detalhes da Escola Regular (só aparece se não frequenta EJA) --- */}
               {formData.frequenta_eja === 'nao' && (
                 <>
                   <div className="form-group">
@@ -591,10 +539,8 @@ const Cadastro = () => {
             </>
           )}
 
-          {/* --- Divisor --- */}
           <hr className="form-divider" />
 
-          {/* --- Dados do Encaminhamento --- */}
           <h2 className="form-section-title">Dados do encaminhamento</h2>
           <div className="form-group">
             <label className="cadastro-label">Órgão Demandante para Acesso ao Serviço</label>
@@ -605,7 +551,6 @@ const Cadastro = () => {
                   <label htmlFor={`org_${item}`}>{item}</label>
                 </div>
               ))}
-              {/* Checkbox "Outro" com lógica especial */}
               <div className="radio-item">
                 <input type="checkbox" id="org_outro" name="orgaoDemandante" value="Outro" onChange={(e) => {
                   handleCheckboxChange(e);
@@ -623,10 +568,8 @@ const Cadastro = () => {
             </div>
           )}
 
-          {/* --- Divisor --- */}
           <hr className="form-divider" />
 
-          {/* --- Público Prioritário --- */}
           <h2 className="form-section-title">Público Prioritário</h2>
           <div className="form-group">
             <div className="radio-group-vertical">
@@ -651,10 +594,8 @@ const Cadastro = () => {
             </div>
           </div>
 
-          {/* --- Divisor --- */}
           <hr className="form-divider" />
 
-          {/* --- Benefícios --- */}
           <h2 className="form-section-title">Benefícios</h2>
           <div className="form-group">
             <div className="radio-group-vertical">
@@ -670,7 +611,6 @@ const Cadastro = () => {
                   <label htmlFor={`ben_${item.replace(/\s/g, '')}`}>{item}</label>
                 </div>
               ))}
-              {/* Checkbox especial para BPC Deficiência */}
               <div className="radio-item">
                 <input
                   type="checkbox"
@@ -694,10 +634,8 @@ const Cadastro = () => {
             </div>
           )}
 
-          {/* --- Divisor --- */}
           <hr className="form-divider" />
 
-          {/* --- CRAS --- */}
           <h2 className="form-section-title">CRAS</h2>
           <div className="form-group">
             <label htmlFor="crasReferencia" className="cadastro-label">CRAS de referência</label>
@@ -709,13 +647,8 @@ const Cadastro = () => {
           </div>
           </>)}
 
-
-          {/* --- PASSO 3: FAMÍLIA E SAÚDE --- */}
           {currentStep === 3 && ( <>
-            {/* --- Divisor --- */}
             <hr className="form-divider" />
-  
-            {/* --- Entidade --- */}
             <h2 className="form-section-title">Entidade</h2>
             <div className="form-group">
               <label htmlFor="nomeEntidade" className="cadastro-label">Nome da entidade</label>
@@ -739,46 +672,31 @@ const Cadastro = () => {
             <input type="text" id="responsavelPreenchimento" name="responsavelPreenchimento" className="input" placeholder="Digite o nome do responsável" />
           </div>
 
-
-
-          {/* --- Divisor --- */}
           <hr className="form-divider" />
 
-          {/* --- Membros Familiares --- */}
           <h2 className="form-section-title">Membros Familiares</h2>
           <div className="family-members-container">
-            {/* Cabeçalho da Tabela */}
             <div className="family-members-header">
               <div className="family-col-nome">Nome</div>
               <div className="family-col-parentesco">Grau de Parentesco</div>
               <div className="family-col-idade">Idade</div>
-              <div className="family-col-action"></div> {/* Espaço para o botão de remover */}
+              <div className="family-col-action"></div> 
             </div>
 
-            {/* Linhas da Tabela */}
             {familyMembers.map((member, index) => (
               <div key={index} className="family-member-row">
                 <input type="text" name="nome" className="input family-col-nome" placeholder="Nome completo" value={member.nome} onChange={(e) => handleFamilyMemberChange(index, e)} />
                 <input type="text" name="parentesco" className="input family-col-parentesco" placeholder="Ex: Mãe, Irmão" value={member.parentesco} onChange={(e) => handleFamilyMemberChange(index, e)} />
                 <input type="text" name="idade" className="input family-col-idade" placeholder="Ex: 35" value={member.idade} onChange={(e) => handleFamilyMemberChange(index, e)} inputMode="numeric" maxLength="3" />
-                <button type="button" className="remove-member-btn" onClick={() => removeFamilyMember(index)}>
-                  &times; {/* Símbolo de 'X' para remover */}
-                </button>
+                <button type="button" className="remove-member-btn" onClick={() => removeFamilyMember(index)}>&times;</button>
               </div>
             ))}
 
-            {/* Botão para Adicionar Membro */}
-            <button type="button" className="add-member-btn" onClick={addFamilyMember}>
-              + Adicionar Membro
-            </button>
+            <button type="button" className="add-member-btn" onClick={addFamilyMember}>+ Adicionar Membro</button>
           </div>
 
-
-
-          {/* --- Divisor --- */}
           <hr className="form-divider" />
 
-          {/* --- Chefe da Família --- */}
           <h2 className="form-section-title">Chefe da família</h2>
           <div className="form-group">
             <div className="radio-group-horizontal">
@@ -802,10 +720,8 @@ const Cadastro = () => {
             </div>
           )}
 
-          {/* --- Divisor --- */}
           <hr className="form-divider" />
 
-          {/* --- Dados sobre a Família --- */}
           <h2 className="form-section-title">Dados sobre a família</h2>
           <div className="form-group">
             <label htmlFor="religiaoFamilia" className="cadastro-label">Religião da família</label>
@@ -861,10 +777,8 @@ const Cadastro = () => {
             <input type="text" id="alergiaDescricao" name="alergiaDescricao" className="input" placeholder="Descreva a alergia" value={formData.alergiaDescricao} onChange={handleChange} />
           </div>
 
-          {/* --- Divisor --- */}
           <hr className="form-divider" />
 
-          {/* --- Responsáveis --- */}
           <div className="form-group">
             <label htmlFor="tecnicoResponsavel" className="cadastro-label">Técnico(a) responsável:</label>
             <input type="text" id="tecnicoResponsavel" name="tecnicoResponsavel" className="input" placeholder="Nome do técnico(a)" value={formData.tecnicoResponsavel} onChange={handleChange} />
@@ -880,19 +794,15 @@ const Cadastro = () => {
             <input type="tel" id="telefoneContato" name="telefoneContato" className="input" placeholder="(XX) XXXXX-XXXX" value={formData.telefoneContato} onChange={handlePhoneInputChange} maxLength="15" />
           </div>
 
-          {/* --- Data do Cadastro --- */}
           <div className="form-group">
             <label htmlFor="dataCadastro" className="cadastro-label">Data do Cadastro</label>
             <input type="text" id="dataCadastro" name="dataCadastro" className="input" value={dataAtual} disabled />
           </div></>
           )}
 
-          {/* --- PASSO 4: CRIAR SENHA --- */}
           {currentStep === 4 && ( <>
-            {/* --- Divisor --- */}
             <hr className="form-divider" />
 
-            {/* --- Senha de Acesso --- */}
             <h2 className="form-section-title">Crie sua Senha de Acesso</h2>
             <div className="form-group">
               <label htmlFor="senha" className="cadastro-label">Crie uma senha</label>
@@ -907,8 +817,6 @@ const Cadastro = () => {
           </>
           )}
 
-
-          {/* --- Botões de Navegação --- */}
           <div className="navigation-buttons">
             {currentStep > 1 && (
               <button type="button" className="nav-button prev-button" onClick={prevStep}>
@@ -927,7 +835,6 @@ const Cadastro = () => {
           </form>
         </div>
 
-        {/* --- Botão Voltar (Fora do formulário) --- */}
         <div className="back-button-container">
           <button className="back-button" onClick={() => navigate('/')}>
             Voltar

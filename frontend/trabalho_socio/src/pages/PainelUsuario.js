@@ -3,6 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/dashboard.css'; 
 import '../styles/cadastro.css';
 
+
+
+import Loading from '../components/Loading';
+
 const PainelUsuario = () => {
   const navigate = useNavigate();
   const [participante, setParticipante] = useState(null);
@@ -94,7 +98,7 @@ const PainelUsuario = () => {
     });
   };
 
-  if (loading) return <div className="dashboard-container"><h2 style={{color: '#fff'}}>Carregando...</h2></div>;
+  if (loading) return <div className="dashboard-container"><h2 style={{color: '#fff'}}>if (loading) return <Loading /></h2></div>;
 
   return (
     <div className="dashboard-container">

@@ -4,6 +4,7 @@ import '../styles/cadastro.css';
 import brasao from '../assets/brasao.png';
 import instituto from '../assets/instituto.png';
 import sagrado from '../assets/Sagrado.png';
+import Loading from '../components/Loading';
 
 const GerenciarEventos = () => {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ const GerenciarEventos = () => {
     local: '',
     categoria: '',
     imagem_url: '',
+    responsavel: '', // NOVO
     data_inicio: '',
     data_fim: ''
   });
@@ -46,7 +48,7 @@ const GerenciarEventos = () => {
   }, []);
 
   const handleNew = () => {
-      setFormData({ id: null, titulo: '', descricao: '', local: '', categoria: '', imagem_url: '', data_inicio: '', data_fim: '' });
+      setFormData({ id: null, titulo: '', descricao: '', local: '', categoria: '', imagem_url: '', responsavel: '', data_inicio: '', data_fim: '' });
       setView('formulario');
   };
 
@@ -91,13 +93,68 @@ const GerenciarEventos = () => {
       } catch (error) { alert('Erro ao excluir'); }
   };
 
-  // Função auxiliar para formatar data
-  const formatarData = (dataISO) => {
-    if (!dataISO) return '';
-    return new Date(dataISO).toLocaleString('pt-BR', {
-      day: '2-digit', month: '2-digit', year: 'numeric', 
-      hour: '2-digit', minute: '2-digit'
-    });
+  // --- FUNÇÃO DE IMPRESSÃO ---
+  const handlePrintList = (evento) => {
+      const printWindow = window.open('', '', 'width=800,height=600');
+      
+      const listaHTML = evento.participantes_lista.length > 0 
+        ? evento.participantes_lista.map((p, i) => `
+            <tr style="border-bottom: 1px solid #ccc;">
+                <td style="padding: 8px; text-align: center;">${i + 1}</td>
+                <td style="padding: 8px;">${p.nome}</td>
+                <td style="padding: 8px; text-align: center;">${p.rg || '-'}</td>
+                <td style="padding: 8px; text-align: center;">_______</td>
+            </tr>
+        `).join('')
+        : '<tr><td colspan="4" style="padding:20px; text-align:center;">Nenhum inscrito.</td></tr>';
+
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Lista de Presença - ${evento.titulo}</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                h1 { text-align: center; margin-bottom: 5px; }
+                .header-info { text-align: center; margin-bottom: 30px; font-size: 14px; color: #555; }
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                th { background: #eee; padding: 10px; border-bottom: 2px solid #333; }
+                .assinatura { margin-top: 50px; text-align: center; }
+            </style>
+          </head>
+          <body>
+            <h1>${evento.titulo}</h1>
+            <div class="header-info">
+                <p><strong>Data:</strong> ${new Date(evento.data_inicio).toLocaleDateString()} &nbsp;|&nbsp; 
+                   <strong>Local:</strong> ${evento.local || 'Não informado'} &nbsp;|&nbsp; 
+                   <strong>Responsável:</strong> ${evento.responsavel || 'Não informado'}
+                </p>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">#</th>
+                        <th>Nome do Participante</th>
+                        <th style="width: 150px;">RG</th>
+                        <th style="width: 150px;">Assinatura</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${listaHTML}
+                </tbody>
+            </table>
+
+            <div class="assinatura">
+                ________________________________________________<br>
+                Responsável: ${evento.responsavel || '__________________'}
+            </div>
+            <script>
+                window.print();
+            </script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
   };
 
   return (
@@ -124,23 +181,25 @@ const GerenciarEventos = () => {
                 </div>
 
                 <div style={{display: 'flex', flexDirection: 'column', gap: '15px'}}>
-                    {loading ? <p style={{color: '#fff', textAlign: 'center'}}>Carregando...</p> : eventos.length === 0 ? <p style={{color: '#ccc', textAlign: 'center'}}>Nenhum evento cadastrado.</p> : eventos.map(evento => (
+                    {loading ? <p style={{color: '#fff', textAlign: 'center'}}>if (loading) return <Loading /></p> : eventos.length === 0 ? <p style={{color: '#ccc', textAlign: 'center'}}>Nenhum evento cadastrado.</p> : eventos.map(evento => (
                         <div key={evento.id} style={{background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '10px', borderLeft: '5px solid #FEBF00', display: 'flex', flexDirection: 'column', gap: '10px'}}>
                             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px'}}>
                                 <div>
                                     <h3 style={{color: '#FEBF00', margin: '0 0 5px 0', fontSize: '1.2rem'}}>{evento.titulo}</h3>
-                                    <span style={{background: '#42a5f5', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem'}}>{evento.categoria || 'Geral'}</span>
+                                    <span style={{background: '#42a5f5', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem', marginRight: '10px'}}>{evento.categoria || 'Geral'}</span>
+                                    <span style={{color: '#ccc', fontSize: '0.9rem'}}>Resp: {evento.responsavel}</span>
                                 </div>
                                 <div>
+                                    {/* BOTÃO IMPRIMIR */}
+                                    <button onClick={() => handlePrintList(evento)} style={{cursor: 'pointer', marginRight: '15px', background: '#fff', border: 'none', color: '#333', padding: '5px 10px', borderRadius: '4px', fontWeight: 'bold'}}>🖨️ Lista de Presença</button>
+                                    
                                     <button onClick={() => handleEdit(evento)} style={{cursor: 'pointer', marginRight: '15px', background: '#FEBF00', border: 'none', color: '#5c0017', padding: '5px 10px', borderRadius: '4px', fontWeight: 'bold'}}>Editar</button>
                                     <button onClick={() => handleDelete(evento.id)} style={{cursor: 'pointer', background: '#ef5350', border: 'none', color: '#fff', padding: '5px 10px', borderRadius: '4px', fontWeight: 'bold'}}>Excluir</button>
                                 </div>
                             </div>
                             
-                            {/* --- DATA E LOCAL ATUALIZADOS --- */}
                             <p style={{color: '#ccc', fontSize: '0.9rem', margin: 0}}>
-                                📅 {formatarData(evento.data_inicio)}
-                                {evento.data_fim ? ` até ${formatarData(evento.data_fim)}` : ''} 
+                                📅 {new Date(evento.data_inicio).toLocaleString()} 
                                 {evento.local && ` | 📍 ${evento.local}`} 
                             </p>
 
@@ -199,9 +258,15 @@ const GerenciarEventos = () => {
                         </div>
                     </div>
 
-                    <div className="form-group">
-                        <label className="cadastro-label">URL da Imagem (Link)</label>
-                        <input className="input" placeholder="http://..." value={formData.imagem_url} onChange={e => setFormData({...formData, imagem_url: e.target.value})} />
+                    <div className="form-group-row">
+                        <div className="form-group">
+                             <label className="cadastro-label">Responsável (Nome)</label>
+                             <input className="input" placeholder="Quem organiza?" value={formData.responsavel} onChange={e => setFormData({...formData, responsavel: e.target.value})} />
+                        </div>
+                        <div className="form-group">
+                            <label className="cadastro-label">URL da Imagem</label>
+                            <input className="input" placeholder="http://..." value={formData.imagem_url} onChange={e => setFormData({...formData, imagem_url: e.target.value})} />
+                        </div>
                     </div>
                     
                     <div style={{display: 'flex', justifyContent: 'flex-end', gap: '15px', marginTop: '30px'}}>
@@ -215,7 +280,6 @@ const GerenciarEventos = () => {
                 </form>
             </div>
         )}
-
       </div>
     </div>
   );

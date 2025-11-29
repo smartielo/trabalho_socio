@@ -6,6 +6,7 @@ import '../styles/dashboard.css';
 import brasao from '../assets/brasao.png';
 import instituto from '../assets/instituto.png';
 import sagrado from '../assets/Sagrado.png';
+import Loading from '../components/Loading';
 
 const ListaParticipantes = () => {
   const navigate = useNavigate();
@@ -112,7 +113,7 @@ const ListaParticipantes = () => {
 
         <div style={{ backgroundColor: 'rgba(0,0,0,0.3)', borderRadius: '10px', padding: '15px', maxHeight: '60vh', overflowY: 'auto' }}>
             {loading ? (
-                <p style={{ color: '#fff', textAlign: 'center' }}>Carregando...</p>
+                <p style={{ color: '#fff', textAlign: 'center' }}>if (loading) return <Loading /></p>
             ) : participantesFiltrados.length > 0 ? (
                 <table style={{ width: '100%', borderCollapse: 'collapse', color: '#fff' }}>
                     <thead>
