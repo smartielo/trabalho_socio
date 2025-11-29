@@ -1,4 +1,5 @@
 import React from 'react';
+// O CSS já foi adicionado no index.css anteriormente
 
 const Loading = ({ message = "Carregando..." }) => {
   return (

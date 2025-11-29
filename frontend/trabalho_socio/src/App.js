@@ -3,7 +3,6 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import Home from './pages/Home';
-import PageFormulario from './pages/Form';
 import NotFound from './pages/NotFound';
 import PageDashboard from './pages/Dashboard';
 import Login from './pages/Login';
@@ -26,7 +25,6 @@ function App() {
         <Routes>
           <Route path="*" element={<NotFound />} />
           <Route path="/" element={<Home />} />
-          <Route path="/form" element={<PageFormulario />} />
           <Route path="/dashboard" element={<PageDashboard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/cadastro" element={<Cadastro />} />

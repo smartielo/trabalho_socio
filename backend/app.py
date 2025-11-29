@@ -433,15 +433,38 @@ def meu_perfil():
         dados = request.get_json()
         if not p: return jsonify({"msg": "Ficha não encontrada"}), 404
         
-        if dados.get('nomeCompleto'): p.nome_completo = dados['nomeCompleto']
-        if dados.get('telefoneContato'): p.telefone_contato = dados['telefoneContato']
-        if dados.get('endereco'): p.endereco = dados['endereco']
-        if dados.get('serie'): p.serie = dados['serie']
-        if dados.get('nome_escola'): p.nome_escola = dados['nome_escola']
+        # --- ATUALIZAÇÃO COMPLETA ---
+        # Campos de Texto
+        if 'nomeCompleto' in dados: p.nome_completo = dados['nomeCompleto']
+        if 'telefoneContato' in dados: p.telefone_contato = dados['telefoneContato']
+        if 'endereco' in dados: p.endereco = dados['endereco']
+        if 'serie' in dados: p.serie = dados['serie']
+        if 'nome_escola' in dados: p.nome_escola = dados['nome_escola']
+        if 'rg' in dados: p.rg = dados['rg']
+        if 'nis' in dados: p.nis = dados['nis']
+        if 'naturalidadeCidade' in dados: p.naturalidade_cidade = dados['naturalidadeCidade']
+        if 'nomeResponsavel' in dados: p.nome_responsavel = dados['nomeResponsavel']
         
+        # Tratamento de Renda (R$ -> Float)
+        renda = dados.get('rendaFamiliar')
+        if renda is not None:
+             try: 
+                 # Aceita tanto formato numérico quanto string "R$ 1.200,00"
+                 val_str = str(renda).replace('R$', '').replace('.', '').replace(',', '.').strip()
+                 p.renda_familiar = float(val_str)
+             except: pass
+
+        # Tratamento de Data (yyyy-mm-dd)
+        data_nasc = dados.get('dataNascimento')
+        if data_nasc:
+             try: p.data_nascimento = datetime.strptime(str(data_nasc), '%Y-%m-%d').date()
+             except: pass
+
+        # Resetar status para pendente pois houve alteração
         p.status = 'pendente'
+        
         db.session.commit()
-        return jsonify({"msg": "Dados atualizados!"}), 200
+        return jsonify({"msg": "Dados atualizados com sucesso!"}), 200
 
 @app.route("/api/admin/participantes/<int:id>/status", methods=['PUT'])
 @jwt_required()
