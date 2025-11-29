@@ -58,7 +58,7 @@ const Creditos = () => {
           <ul className="team-list">
             {/* Liste os alunos aqui */}
             <li>Ana Nabeiro Junc</li>
-            <li><span className="nome-efeito-fade">Eduardo Perfeito Euzébio</span></li>
+            {/*<li><span className="nome-efeito-fade">Eduardo Perfeito Euzébio</span></li>*/}
             <li>Emerson Mazzeto</li>
             <li>Gabriel Furlaneto de Luiz</li>
             <li>Gabriel Martielo da Silva</li>
