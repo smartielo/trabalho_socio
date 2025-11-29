@@ -54,3 +54,24 @@ code {
   font-weight: bold;
   letter-spacing: 1px;
 }
+
+.nome-efeito-fade {
+    /* Estado normal: totalmente visível */
+    opacity: 1;
+    /* A mágica acontece aqui:
+       - 'opacity' é o que vamos animar.
+       - '2s' é o tempo que leva para sumir (mude para 1s se quiser mais rápido, ou 3s para mais lento).
+       - 'ease-in-out' faz a animação começar e terminar suavemente.
+    */
+    transition: opacity 2s ease-in-out, filter 2s ease-in-out;
+    cursor: help; /* Muda o cursor para um ponto de interrogação, indicando algo diferente */
+    display: inline-block; /* Garante que o efeito se aplique corretamente ao texto */
+}
+
+/* Quando o mouse passa por cima (:hover) */
+.nome-efeito-fade:hover {
+    /* Estado final: invisível */
+    opacity: 0;
+    /* BÔNUS: Adiciona um leve "borrão" enquanto some para ficar mais dramático */
+    filter: blur(4px);
+}
