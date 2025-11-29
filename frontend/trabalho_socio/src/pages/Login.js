@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import InputMask from 'react-input-mask'; // Importação do InputMask
+import InputMask from 'react-input-mask'; 
 
 import '../styles/Login.css';
 import '../styles/cadastro.css';
@@ -11,24 +11,29 @@ import sagrado from '../assets/Sagrado.png';
 
 const Login = () => {
   const navigate = useNavigate();
+  
+  // Estado para controlar se é login de Admin ou Usuário Comum
+  const [isAdminMode, setIsAdminMode] = useState(false);
+  
   const [cpf, setCpf] = useState('');
   const [senha, setSenha] = useState('');
   const [error, setError] = useState('');
 
   useEffect(() => {
     document.body.classList.add('cadastro-page-active');
-    document.title = 'C.S.E. - Irmã Adelaide | Login';
+    // Muda o título da aba dependendo do modo
+    document.title = isAdminMode 
+        ? 'C.S.E. - Irmã Adelaide | Login Administrativo' 
+        : 'C.S.E. - Irmã Adelaide | Login Participante';
+
     return () => {
       document.body.classList.remove('cadastro-page-active');
     };
-  }, []);
+  }, [isAdminMode]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
-
-    // Remove caracteres não numéricos para validação, se necessário
-    // const cpfLimpo = cpf.replace(/\D/g, '');
 
     if (!cpf || !senha) {
       setError('Por favor, preencha o CPF e a senha.');
@@ -44,17 +49,23 @@ const Login = () => {
 
       if (response.ok) {
         const data = await response.json();
+
+        // --- NOVA VALIDAÇÃO DE SEGURANÇA ---
+        // Se estiver no modo Admin, mas o usuário for 'comum', BLOQUEIA.
+        if (isAdminMode && data.tipo === 'comum') {
+            setError('Acesso negado. Esta área é exclusiva para administradores.');
+            return; // Não salva o token e não loga
+        }
+        // -----------------------------------
         
-        // Salva token e dados do usuário
         localStorage.setItem('token', data.access_token);
-        localStorage.setItem('userType', data.tipo); // Salva se é Admin, Master ou Comum
+        localStorage.setItem('userType', data.tipo); 
         localStorage.setItem('userName', data.nome);
 
-        // Redireciona baseado no tipo
+        // Redirecionamento
         if (data.tipo === 'Master' || data.tipo === 'Admin') {
             navigate('/dashboard');
         } else {
-            // Usuário comum vai para o painel dele
             navigate('/painel-usuario'); 
         }
         
@@ -78,13 +89,18 @@ const Login = () => {
         </div>
       </header>
 
-      <div className="login-form-container">
-        <h1 className="cadastro-title">Login</h1>
+      <div className="login-form-container" style={{ 
+          border: isAdminMode ? '2px solid #FEBF00' : '1px solid rgba(255,255,255,0.18)', // Destaque dourado no admin
+          transition: 'all 0.3s ease'
+      }}>
+        
+        <h1 className="cadastro-title" style={{ color: isAdminMode ? '#FEBF00' : '#fff' }}>
+            {isAdminMode ? 'Acesso Administrativo' : 'Área do Participante'}
+        </h1>
+
         <form onSubmit={handleLogin}>
           <div className="form-group">
             <label htmlFor="cpf" className="cadastro-label">CPF</label>
-            
-            {/* Input com máscara */}
             <InputMask 
                 mask="999.999.999-99" 
                 maskChar={null}
@@ -108,15 +124,54 @@ const Login = () => {
                 onChange={(e) => setSenha(e.target.value)} 
             />
           </div>
-          {error && <p className="error-message">{error}</p>}
-          <button type="submit" className="submit-button login-button">Entrar</button>
+          
+          {error && <p className="error-message" style={{textAlign: 'center', fontWeight: 'bold'}}>{error}</p>}
+          
+          <button type="submit" className="submit-button login-button" style={{
+              backgroundColor: isAdminMode ? '#FEBF00' : '#28a745', // Botão muda de cor
+              color: isAdminMode ? '#5c0017' : '#fff',
+              borderColor: isAdminMode ? '#FEBF00' : '#28a745'
+          }}>
+              {isAdminMode ? 'Entrar como Admin' : 'Entrar'}
+          </button>
         </form>
-        <p className="signup-link">Não tem uma conta? <Link to="/cadastro">Cadastre-se</Link></p>
+
+        {/* Links de Rodapé do Card */}
+        <div style={{ marginTop: '25px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            
+            {!isAdminMode && (
+                <span className="signup-link">
+                    Não tem uma conta? <Link to="/cadastro">Cadastre-se</Link>
+                </span>
+            )}
+
+            {/* --- BOTÃO DE TROCA DE MODO --- */}
+            <button 
+                onClick={() => {
+                    setIsAdminMode(!isAdminMode);
+                    setError(''); // Limpa erros ao trocar
+                    setCpf('');
+                    setSenha('');
+                }}
+                style={{
+                    background: 'none',
+                    border: 'none',
+                    color: isAdminMode ? '#fff' : '#FEBF00', // Cor inversa ao título
+                    textDecoration: 'underline',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    marginTop: '10px'
+                }}
+            >
+                {isAdminMode ? '← Voltar para Área do Participante' : 'Sou Coordenador / Administrador'}
+            </button>
+        </div>
+
       </div>
 
       <div className="back-button-container">
         <button className="back-button" onClick={() => navigate('/')}>
-          Voltar
+          Voltar ao Início
         </button>
       </div>
     </div>

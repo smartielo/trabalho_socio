@@ -11,14 +11,11 @@ ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarEle
 const PageDashboard = () => {
   const navigate = useNavigate();
   
-  // Estado para a busca
   const [searchTerm, setSearchTerm] = useState('');
-  
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Função para buscar dados do Dashboard
   const fetchDashboardData = useCallback(async () => {
     setLoading(true);
     const token = localStorage.getItem('token');
@@ -61,12 +58,9 @@ const PageDashboard = () => {
     navigate('/');
   };
 
-  // --- NOVA FUNÇÃO: GERAR CSV ---
-  // --- FUNÇÃO ATUALIZADA: GERAR CSV COMPLETO ---
   const handleExportCSV = async () => {
     const token = localStorage.getItem('token');
     try {
-      // 1. Busca todos os participantes
       const response = await fetch('http://localhost:5000/api/participantes/todos', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -80,44 +74,21 @@ const PageDashboard = () => {
         return;
       }
 
-      // 2. Pega Data e Hora atuais
       const agora = new Date();
       const dataHoraGeracao = agora.toLocaleString('pt-BR');
 
-      // 3. Define o Cabeçalho do CSV (Adicionando novas colunas)
       const headers = [
-        "ID", 
-        "Status",
-        "Nome Completo", 
-        "CPF", 
-        "RG", 
-        "NIS", 
-        "Nascimento", 
-        "Sexo", 
-        "Telefone", 
-        "Endereço", 
-        "Cidade", 
-        "UF", 
-        "Nome do Responsável", 
-        "CPF Responsável", 
-        "Situação Escolar", 
-        "Escola", 
-        "Série", 
-        "Turno", 
-        "Renda Familiar", 
-        "Chefe Família", 
-        "Benefícios", 
-        "Medicamentos", 
-        "Alergias"
+        "ID", "Status", "Nome Completo", "CPF", "RG", "NIS", "Nascimento", "Sexo", 
+        "Telefone", "Endereço", "Cidade", "UF", "Nome do Responsável", "CPF Responsável", 
+        "Situação Escolar", "Escola", "Série", "Turno", "Renda Familiar", "Chefe Família", 
+        "Benefícios", "Medicamentos", "Alergias"
       ];
 
-      // 4. Monta o CSV
-      // Nota: As strings com aspas `"${...}"` evitam que vírgulas no texto quebrem as colunas do Excel
       const csvRows = [
-        `Relatório Geral de Participantes (Completo);;;;;;;;;;;;;;;;;;;;;;`, // Título (com ; suficientes para cobrir as colunas)
+        `Relatório Geral de Participantes (Completo);;;;;;;;;;;;;;;;;;;;;;`, 
         `Gerado em: ${dataHoraGeracao};;;;;;;;;;;;;;;;;;;;;;`,
-        ``, // Linha em branco
-        headers.join(';'), // Cabeçalho das colunas
+        ``, 
+        headers.join(';'), 
         ...listaCompleta.map(p => [
           p.id,
           p.status ? p.status.toUpperCase() : 'PENDENTE',
@@ -128,24 +99,23 @@ const PageDashboard = () => {
           p.dataNascimento,
           p.sexo,
           `"${p.telefoneContato || ''}"`,
-          `"${p.endereco || ''}"`,           // Novo: Endereço
-          `"${p.naturalidadeCidade || ''}"`, // Novo: Cidade
-          `"${p.ufNaturalidade || ''}"`,     // Novo: UF
-          `"${p.nomeResponsavel || ''}"`,    // Novo: Responsável
-          `"${p.cpfResponsavel || ''}"`,     // Novo: CPF Resp.
+          `"${p.endereco || ''}"`,
+          `"${p.naturalidadeCidade || ''}"`,
+          `"${p.ufNaturalidade || ''}"`,
+          `"${p.nomeResponsavel || ''}"`,
+          `"${p.cpfResponsavel || ''}"`,
           p.situacao_escolar,
-          `"${p.nome_escola || ''}"`,        // Novo: Escola
-          `"${p.serie || ''}"`,              // Novo: Série
-          `"${p.turno || ''}"`,              // Novo: Turno
+          `"${p.nome_escola || ''}"`,
+          `"${p.serie || ''}"`,
+          `"${p.turno || ''}"`,
           `"${p.rendaFamiliar}"`,
           p.chefeFamilia,
-          `"${(p.beneficios || []).join(', ')}"`, // Novo: Lista de Benefícios
-          `"${p.medicamentoUso || ''}"`,          // Novo: Medicamentos
-          `"${p.alergiaDescricao || ''}"`         // Novo: Alergias
+          `"${(p.beneficios || []).join(', ')}"`,
+          `"${p.medicamentoUso || ''}"`,
+          `"${p.alergiaDescricao || ''}"`
         ].join(';'))
       ];
 
-      // 5. Cria o arquivo e força o download
       const csvString = "\uFEFF" + csvRows.join('\n');
       const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
@@ -167,7 +137,6 @@ const PageDashboard = () => {
   if (loading && !dashboardData) return <div className="dashboard-container"><h1 style={{color:'#fff'}}>Carregando...</h1></div>;
   if (error) return <div className="dashboard-container"><h1 style={{color:'#fff'}}>{error}</h1></div>;
 
-  // Preparação dos Gráficos
   const doughnutData = {
     labels: dashboardData?.encaminhamentosData?.labels || [],
     datasets: [{
@@ -205,7 +174,6 @@ const PageDashboard = () => {
                 🔄 Atualizar
             </button>
             
-            {/* BOTÃO DE PLANILHA */}
             <button onClick={handleExportCSV} className="submit-button" style={{ padding: '10px 15px', fontSize: '0.9rem', backgroundColor: '#28a745', borderColor: '#28a745' }}>
                 📊 Baixar Planilha
             </button>
@@ -213,16 +181,17 @@ const PageDashboard = () => {
             <Link to="/cadastro" className="submit-button" style={{ textDecoration: 'none', textAlign: 'center', padding: '10px 15px', fontSize: '0.9rem' }}>
                 + Nova Matrícula
             </Link>
+
             <button onClick={() => navigate('/gerenciar-eventos')} className="submit-button" style={{ padding: '10px 15px', fontSize: '0.9rem', backgroundColor: '#6f42c1', borderColor: '#6f42c1' }}>
-            📅 Eventos
+                📅 Eventos
             </button>
+
             <button onClick={handleLogout} className="submit-button" style={{ padding: '10px 15px', fontSize: '0.9rem', backgroundColor: '#dc3545', borderColor: '#dc3545' }}>
                 Sair
             </button>
         </div>
       </div>
 
-      {/* KPIs */}
       <div className="kpi-grid">
         <div className="kpi-card"><h2>{dashboardData.totalParticipants}</h2><p>Total Ativos</p></div>
         <div className="kpi-card warning"><h2>{dashboardData.pendingRegistrations}</h2><p>Pendentes</p></div>
@@ -230,7 +199,6 @@ const PageDashboard = () => {
         <div className="kpi-card danger"><h2>{dashboardData.familiasPNE}</h2><p>Famílias PNE</p></div>
       </div>
 
-      {/* Widget de Busca FUNCIONAL */}
       <div className="search-widget">
         <h3>Buscar Participante</h3>
         <input 
@@ -249,7 +217,6 @@ const PageDashboard = () => {
             Buscar
         </button>
         
-        {/* Botão para ver todos */}
         <button 
             type="button" 
             className="submit-button"
@@ -259,23 +226,28 @@ const PageDashboard = () => {
         </button>
       </div>
 
-      {/* Listas */}
       <div className="dashboard-row">
          <div className="dashboard-widget list-widget">
           <h3>Últimas Matrículas</h3>
           <ul>
             {dashboardData.recentRegistrations.map(item => (
-              <li key={item.id} className="list-item">
-                <strong>{item.name}</strong>
-                <span>{item.date}</span>
-                <Link to={`/perfil/${item.id}`}>Ver Perfil</Link> 
+              <li key={item.id} className="list-item" style={{ display: 'flex', alignItems: 'center' }}>
+                {/* ALINHAMENTO CORRIGIDO AQUI: */}
+                <strong style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: '10px' }}>
+                    {item.name}
+                </strong>
+                <span style={{ width: '120px', textAlign: 'center', flexShrink: 0 }}>
+                    {item.date}
+                </span>
+                <div style={{ width: '100px', textAlign: 'right', flexShrink: 0 }}>
+                    <Link to={`/perfil/${item.id}`}>Ver Perfil</Link> 
+                </div>
               </li>
             ))}
           </ul>
         </div>
       </div>
 
-      {/* Gráficos */}
       <div className="dashboard-row">
         <div className="dashboard-widget chart-widget">
           <h3>Origem dos Encaminhamentos</h3>
