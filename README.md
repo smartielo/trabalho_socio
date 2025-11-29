@@ -1,108 +1,144 @@
-# Sistema de Gestão - Centro Socioeducativo Irmã Adelaide
+# Sistema de Gestão Socioeducativa - C.S.E. Irmã Adelaide
 
 ## 📖 Sobre o Projeto
 
-Este projeto é uma iniciativa do projeto de extensão **"Fábrica de Software"** da UNISAGRADO - Bauru/SP. O objetivo é desenvolver um sistema web para o **Centro Socioeducativo Irmã Adelaide**, visando otimizar e digitalizar o processo de inscrição e gestão dos participantes de seus projetos sociais. 
+Este projeto é uma plataforma web completa para a gestão do **Centro Socioeducativo Irmã Adelaide**. O sistema digitaliza todo o processo de inscrição, acompanhamento e gestão de participantes, substituindo fichas de papel por um fluxo digital seguro e eficiente.
 
-Atualmente, o processo de cadastro é feito manualmente através de fichas de papel. A nova plataforma web irá substituir esse método, facilitando a gestão das informações, o acompanhamento das atividades e a geração de relatórios. 
+O sistema conta com painéis distintos para **Administradores** e **Participantes**, gestão de eventos com lista de presença, controle de aprovação de matrículas e relatórios estatísticos.
 
-### O Cliente
-
-  * **Instituição:** Centro Socioeducativo Irmã Adelaide 
-  * **Localização:** Av. Santa Beatriz da Silva 7-40, Ferradura Mirim, Bauru – SP, Cep: 17031-365. 
-  * **Contato:** Rafael 
-  * **Telefones:** (14) 99715-8552 (Whatsapp) / (14) 3203-1993. 
-  * **Redes Sociais:** [Instagram](https://www.instagram.com/projetos_sociaisiascj/)
+---
 
 ## ✨ Funcionalidades Principais
 
-  * **Cadastro Digital:** Substituição da ficha de inscrição manual por um formulário web completo e intuitivo.
-  * **Gestão de Participantes:** Criação, visualização, edição e remoção de cadastros.
-  * **Controle Familiar:** Registro de membros familiares e do chefe da família.
-  * **Acompanhamento Socioeducativo:** Módulo para registro de informações escolares, de saúde e de vulnerabilidade social.
-  * **Segurança:** Controle de acesso para garantir a privacidade dos dados.
+### 🔐 Acesso e Segurança
+* **Autenticação Segura:** Login com JWT (JSON Web Tokens).
+* **Controle de Níveis de Acesso:**
+    * **Master/Admin:** Acesso total ao sistema.
+    * **Comum (Participante):** Acesso restrito aos seus próprios dados e eventos.
+* **Recuperação de Senha:** Solicitação de reset pelo usuário e aprovação pelo administrador.
+* **Proteção de Rotas:** Bloqueio de páginas não autorizadas via Frontend e Backend.
+* **Variáveis de Ambiente:** Credenciais sensíveis protegidas via arquivo `.env`.
 
-## 💻 Tecnologias Utilizadas
+### 🏢 Módulo Administrativo (Dashboard)
+* **KPIs em Tempo Real:** Total de ativos, pendentes, público prioritário e famílias PNE.
+* **Gráficos Estatísticos:** Origem dos encaminhamentos e distribuição por sexo.
+* **Gestão de Matrículas:**
+    * Listagem com filtros avançados (Nome, CPF, Status).
+    * Aprovação e Reprovação de cadastros.
+    * Visualização completa da ficha do participante.
+    * Exportação de Relatórios em CSV (Excel).
+* **Gestão de Usuários:**
+    * Criação de novos Administradores.
+    * Remoção de usuários.
+    * Aprovação de pedidos de reset de senha.
 
-Este projeto será construído utilizando as seguintes tecnologias (a serem definidas):
+### 📅 Módulo de Eventos
+* **CRUD Completo:** Criar, Editar e Excluir eventos da instituição.
+* **Controle de Inscritos:** Visualização de quem se inscreveu em cada atividade.
+* **Lista de Presença:** Geração automática de lista de chamada pronta para impressão (com nomes e RGs).
 
-  * **Frontend: React.JS
-  * **Backend: Python + Flask
-  * **Banco de Dados: SQL
+### 👤 Módulo do Participante (Área do Usuário)
+* **Auto-Cadastro:** Formuláriowizard (passo a passo) intuitivo.
+* **Status da Inscrição:** Acompanhamento em tempo real (Pendente/Aprovado).
+* **Edição de Perfil:** Atualização de dados cadastrais (reseta o status para nova análise).
+* **Inscrição em Eventos:** Visualização e inscrição/desinscrição em atividades disponíveis.
 
-O sistema final deverá ser hospedado em um serviço de nuvem gratuito.
+---
 
-## 📂 Estrutura do Repositório
-
-O repositório está organizado de forma monorepo, dividido em três diretórios principais:
-
-```
-.
-├── backend/      # Contém todo o código da API e lógica de negócio
-├── database/     # Scripts, diagramas e configurações do banco de dados
-└── frontend/     # Contém todo o código da interface do usuário (UI)
-```
-
-## 🚀 Como Executar o Projeto
-
-Siga os passos abaixo para configurar e executar o ambiente de desenvolvimento localmente.
-
-### Pré-requisitos
-
-  * Node.js (versão LTS)
-  * Git
+## 🛠 Tecnologias Utilizadas
 
 ### Backend
-
-```bash
-# Navegue até a pasta do backend
-cd backend
-
-# Instale as dependências
-npm install
-
-# Inicie o servidor de desenvolvimento
-npm run dev
-```
+* **Linguagem:** Python 3.8+
+* **Framework:** Flask
+* **Banco de Dados:** MySQL (via SQLAlchemy)
+* **Autenticação:** Flask-JWT-Extended & Bcrypt
+* **Outros:** Python-Dotenv, Faker (para dados de teste)
 
 ### Frontend
+* **Biblioteca:** React.js
+* **Estilização:** CSS Modules (Design Responsivo e Moderno)
+* **Gráficos:** Chart.js & React-Chartjs-2
+* **Notificações:** React-Toastify
+* **Rotas:** React Router Dom v6
+* **Utilitários:** Date-fns, React Input Mask
 
-```bash
-# Em um novo terminal, navegue até a pasta do frontend
-cd frontend
+---
 
-# Instale as dependências
-npm install
+## 🚀 Guia de Instalação e Execução
 
-# Inicie a aplicação React/Vue/Angular
-npm start
-```
+### Pré-requisitos
+* Python instalado e adicionado ao PATH.
+* Node.js (v16 ou superior).
+* MySQL Server rodando (recomendado XAMPP ou Workbench).
 
-### Banco de Dados
+### 1. Configuração do Banco de Dados e Backend
 
-[Instruções sobre como configurar o banco de dados localmente, por exemplo, executar um script SQL, iniciar um container Docker, etc.]
+1.  Acesse a pasta `backend`.
+2.  Crie um arquivo chamado `.env` e configure suas credenciais:
+    ```env
+    JWT_SECRET_KEY=sua_chave_secreta_aqui
+    DATABASE_URL=mysql+pymysql://root:SUA_SENHA@localhost:3306/socioeducativo_db
+    ```
+    *(Se usar XAMPP sem senha, deixe vazio após os dois pontos: `root:@localhost...`)*
 
-## 🤝 Como Contribuir
+3.  Instale as dependências:
+    ```bash
+    pip install flask flask-cors flask-sqlalchemy flask-bcrypt flask-jwt-extended pymysql python-dotenv faker
+    ```
 
-Agradecemos o interesse em contribuir\! Siga os passos abaixo:
+4.  **Inicialize o Banco de Dados:**
+    Utilize o script automatizado para criar as tabelas e usuários padrão.
+    ```bash
+    python gerenciador_banco.py
+    ```
+    * Escolha a **Opção 2 (PREPARAR DEMO)** para criar o banco, admin padrão e dados de teste.
 
-1.  **Faça um Fork** do projeto.
-2.  Crie uma nova branch para sua feature (`git checkout -b feature/sua-feature`).
-3.  Faça o commit de suas alterações (`git commit -m 'feat: Adiciona sua feature'`).
-4.  Faça o push para a sua branch (`git push origin feature/sua-feature`).
-5.  Abra um **Pull Request**.
+5.  Inicie o servidor:
+    ```bash
+    python app.py
+    ```
+    *O servidor rodará em `http://127.0.0.1:5000`.*
 
-## 👨‍💻 Autores
+### 2. Configuração do Frontend
 
-Este projeto está sendo desenvolvido pelos alunos do curso de Ciências da Computação e Design da UNISAGRADO, como parte do projeto de extensão "Fábrica de Software".
+1.  Em um novo terminal, acesse a pasta `frontend/trabalho_socio`.
+2.  Instale as dependências (apenas na primeira vez):
+    ```bash
+    npm install
+    ```
+3.  Inicie a aplicação:
+    ```bash
+    npm start
+    ```
+    *O site abrirá em `http://localhost:3000`.*
 
-* Ana Nabeiro Junc
-* Eduardo Perfeito Euzébio
-* Emerson Mazzeto
-* Gabriel Furlaneto de Luiz
-* Gabriel Martielo da Silva
-* João Vitor de Paula Diniz
+---
 
-## 📄 Licença
+## 🔑 Dados de Acesso Padrão
 
-Este projeto é licenciado sob a Licença MIT. Veja o arquivo [LICENSE](https://www.google.com/search?q=LICENSE) para mais detalhes.
+Após rodar o `gerenciador_banco.py` (Opção 2), utilize:
+
+| Tipo | CPF | Senha |
+| :--- | :--- | :--- |
+| **Administrador Master** | `000.000.000-00` | `admin` |
+| **Usuário Comum** | `111.111.111-11` | `usuario123` |
+
+---
+
+## 📂 Estrutura do Projeto
+
+/ ├── backend/ # API Python Flask │ ├── app.py # Código principal do servidor e rotas │ ├── gerenciador_banco.py# Script para resetar/popular banco │ └── .env # Variáveis de ambiente (não versionado) │ └── frontend/ # Interface React └── trabalho_socio/ ├── src/ │ ├── components/ # Loading, ProtectedRoute, etc. │ ├── pages/ # Páginas (Login, Dashboard, Cadastro, etc.) │ ├── styles/ # Arquivos CSS │ └── assets/ # Imagens e Logos └── package.json /
+
+## 🤝 Autores
+
+Projeto desenvolvido como parte do projeto de extensão **"Fábrica de Software"** da UNISAGRADO.
+
+* **Ana Nabeiro Junc**
+* **Emerson Mazzeto**
+* **Gabriel Furlaneto de Luiz**
+* **Gabriel Martielo da Silva**
+* **João Vitor de Paula Diniz**
+
+---
+
+**Orientador:** Prof. Dr. Elvio Gilberto da Silva
