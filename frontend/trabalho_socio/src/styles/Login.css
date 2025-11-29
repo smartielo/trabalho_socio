@@ -39,7 +39,7 @@
     text-decoration: underline;
 }
 
-/* Adiciona espaço APENAS no botão "Voltar" da página de login */
+/* Espaçamento para o botão Voltar abaixo do form */
 .login-form-container + .back-button-container {
     margin-top: 2rem;
 }

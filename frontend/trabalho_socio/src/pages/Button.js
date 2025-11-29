@@ -1,5 +1,5 @@
 import React from 'react';
-import './Login.css'; // Importa os estilos para o botão
+import '../styles/Home.css'; // Importa os estilos para o botão
 
 const Button = ({ children, onClick, ...rest }) => {
   return (
