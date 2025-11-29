@@ -1,19 +1,19 @@
 {
   "files": {
-    "main.css": "/static/css/main.ec82aa0f.css",
-    "main.js": "/static/js/main.05ad34a5.js",
+    "main.css": "/static/css/main.f42dd03e.css",
+    "main.js": "/static/js/main.9a33cb0b.js",
     "static/js/453.7845502b.chunk.js": "/static/js/453.7845502b.chunk.js",
     "static/media/brasao.png": "/static/media/brasao.5cedcc0537f0e1612c9e.png",
     "static/media/coordenadoria-de-extensao.jpg": "/static/media/coordenadoria-de-extensao.a03e8ab1b68e85ad8dc5.jpg",
     "static/media/Sagrado.png": "/static/media/Sagrado.466afddd5cc1f22525f2.png",
     "static/media/instituto.png": "/static/media/instituto.2b0a3ef5bf6e391008d8.png",
     "index.html": "/index.html",
-    "main.ec82aa0f.css.map": "/static/css/main.ec82aa0f.css.map",
-    "main.05ad34a5.js.map": "/static/js/main.05ad34a5.js.map",
+    "main.f42dd03e.css.map": "/static/css/main.f42dd03e.css.map",
+    "main.9a33cb0b.js.map": "/static/js/main.9a33cb0b.js.map",
     "453.7845502b.chunk.js.map": "/static/js/453.7845502b.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.ec82aa0f.css",
-    "static/js/main.05ad34a5.js"
+    "static/css/main.f42dd03e.css",
+    "static/js/main.9a33cb0b.js"
   ]
 }
