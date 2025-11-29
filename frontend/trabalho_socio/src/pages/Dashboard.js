@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Loading from '../components/Loading'; // Importe o Loading
 import '../styles/dashboard.css';
 import '../styles/cadastro.css';
-import Loading from '../components/Loading';
 
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { Doughnut, Bar } from 'react-chartjs-2';
@@ -135,14 +135,16 @@ const PageDashboard = () => {
     }
   };
 
-  if (loading && !dashboardData) return <div className="dashboard-container"><h1 style={{color:'#fff'}}>if (loading) return <Loading /></h1></div>;
+  // --- AQUI É O PULO DO GATO: Loading fora do container ---
+  if (loading) return <Loading />;
   if (error) return <div className="dashboard-container"><h1 style={{color:'#fff'}}>{error}</h1></div>;
+  if (!dashboardData) return null;
 
   const doughnutData = {
-    labels: dashboardData?.encaminhamentosData?.labels || [],
+    labels: dashboardData.encaminhamentosData?.labels || [],
     datasets: [{
       label: 'Origem',
-      data: dashboardData?.encaminhamentosData?.values || [],
+      data: dashboardData.encaminhamentosData?.values || [],
       backgroundColor: ['rgba(255, 140, 0, 0.8)', 'rgba(255, 215, 0, 0.8)', 'rgba(236, 64, 122, 0.8)', 'rgba(30, 136, 229, 0.8)', 'rgba(0, 200, 83, 0.8)'],
       borderColor: ['#FF8C00', '#FFD700', '#EC407A', '#1E88E5', '#00C853'],
       borderWidth: 1,
@@ -150,10 +152,10 @@ const PageDashboard = () => {
   };
 
   const barData = {
-    labels: dashboardData?.publicoAlvoData?.labels || [],
+    labels: dashboardData.publicoAlvoData?.labels || [],
     datasets: [{
       label: 'Participantes',
-      data: dashboardData?.publicoAlvoData?.values || [],
+      data: dashboardData.publicoAlvoData?.values || [],
       backgroundColor: '#ffae00ff',
       borderColor: '#ffa600ff',
       borderWidth: 1,
@@ -164,6 +166,10 @@ const PageDashboard = () => {
     scales: { y: { beginAtZero: true, ticks: { color: '#fff' } }, x: { ticks: { color: '#fff' } } },
     plugins: { legend: { display: false } }
   };
+
+  // Verifica se tem dados para os gráficos
+  const temDadosEncaminhamento = dashboardData.encaminhamentosData?.values?.length > 0;
+  const temDadosSexo = dashboardData.publicoAlvoData?.values?.length > 0;
 
   return (
     <div className="dashboard-container">
@@ -179,7 +185,6 @@ const PageDashboard = () => {
                 📊 Baixar Planilha
             </button>
 
-            {/* BOTÃO GERENCIAR USUÁRIOS (NOVO) */}
             <button onClick={() => navigate('/gerenciar-usuarios')} className="submit-button" style={{ padding: '10px 15px', fontSize: '0.9rem', backgroundColor: '#ff9800', borderColor: '#ff9800' }}>
                 👥 Usuários
             </button>
@@ -238,7 +243,6 @@ const PageDashboard = () => {
           <ul>
             {dashboardData.recentRegistrations.map(item => (
               <li key={item.id} className="list-item" style={{ display: 'flex', alignItems: 'center' }}>
-                {/* ALINHAMENTO MANTIDO DA CORREÇÃO ANTERIOR */}
                 <strong style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: '10px' }}>
                     {item.name}
                 </strong>
@@ -258,13 +262,22 @@ const PageDashboard = () => {
         <div className="dashboard-widget chart-widget">
           <h3>Origem dos Encaminhamentos</h3>
           <div className="chart-container">
-            <Doughnut data={doughnutData} options={{ plugins: { legend: { labels: { color: '#fff' } } } }} />
+            {temDadosEncaminhamento ? (
+                <Doughnut data={doughnutData} options={{ plugins: { legend: { labels: { color: '#fff' } } } }} />
+            ) : (
+                <p style={{color: '#ccc', textAlign: 'center', marginTop: '50px'}}>Nenhum dado de encaminhamento registrado.</p>
+            )}
           </div>
         </div>
+        
         <div className="dashboard-widget chart-widget">
           <h3>Participantes por Sexo</h3>
           <div className="chart-container">
-            <Bar data={barData} options={barOptions} />
+            {temDadosSexo ? (
+                <Bar data={barData} options={barOptions} />
+            ) : (
+                <p style={{color: '#ccc', textAlign: 'center', marginTop: '50px'}}>Nenhum dado demográfico registrado.</p>
+            )}
           </div>
         </div>
       </div>

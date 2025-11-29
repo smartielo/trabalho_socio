@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import InputMask from 'react-input-mask'; 
 import { toast } from 'react-toastify';
+import Loading from '../components/Loading'; // Importa o Loading
 
 import '../styles/Login.css';
 import '../styles/cadastro.css';
@@ -15,6 +16,7 @@ const Login = () => {
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [cpf, setCpf] = useState('');
   const [senha, setSenha] = useState('');
+  const [loading, setLoading] = useState(false); // Novo estado
   
   // Modal de Reset
   const [showResetModal, setShowResetModal] = useState(false);
@@ -39,6 +41,8 @@ const Login = () => {
       return;
     }
 
+    setLoading(true); // Ativa o spinner
+
     try {
       const response = await fetch('http://localhost:5000/api/login', {
         method: 'POST',
@@ -51,6 +55,7 @@ const Login = () => {
 
         if (isAdminMode && data.tipo === 'comum') {
             toast.error('Acesso negado. Área exclusiva para administradores.');
+            setLoading(false); // Desativa spinner
             return;
         }
         
@@ -65,12 +70,16 @@ const Login = () => {
         } else {
             navigate('/painel-usuario'); 
         }
+        // Não precisa setLoading(false) aqui porque vai navegar para outra página
         
       } else {
-        toast.error('CPF ou senha inválidos.');
+        const data = await response.json();
+        toast.error(data.msg || 'CPF ou senha inválidos.');
+        setLoading(false);
       }
     } catch (err) {
       toast.error('Falha na conexão com o servidor.');
+      setLoading(false);
     }
   };
 
@@ -99,6 +108,10 @@ const Login = () => {
 
   return (
     <div className="app-container">
+      
+      {/* Loading fora do container para não cortar */}
+      {loading && <Loading message="Autenticando..." />}
+
       <header className="cadastro-header">
         <img src={brasao} alt="Brasão" className="header-brasao" />
         <div className="header-divider" />
@@ -143,7 +156,7 @@ const Login = () => {
               backgroundColor: isAdminMode ? '#FEBF00' : '#28a745',
               color: isAdminMode ? '#5c0017' : '#fff',
               borderColor: isAdminMode ? '#FEBF00' : '#28a745'
-          }}>
+          }} disabled={loading}>
               {isAdminMode ? 'Entrar como Admin' : 'Entrar'}
           </button>
         </form>

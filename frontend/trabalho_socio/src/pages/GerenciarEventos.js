@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Loading from '../components/Loading'; // Importe o Loading
 import '../styles/cadastro.css'; 
 import brasao from '../assets/brasao.png';
 import instituto from '../assets/instituto.png';
 import sagrado from '../assets/Sagrado.png';
-import Loading from '../components/Loading';
 
 const GerenciarEventos = () => {
   const navigate = useNavigate();
@@ -20,12 +20,13 @@ const GerenciarEventos = () => {
     local: '',
     categoria: '',
     imagem_url: '',
-    responsavel: '', // NOVO
+    responsavel: '',
     data_inicio: '',
     data_fim: ''
   });
 
   const fetchEventos = async () => {
+    setLoading(true); // Garante que o loading aparece
     const token = localStorage.getItem('token');
     try {
         const response = await fetch('http://localhost:5000/api/admin/eventos', {
@@ -93,7 +94,6 @@ const GerenciarEventos = () => {
       } catch (error) { alert('Erro ao excluir'); }
   };
 
-  // --- FUNÇÃO DE IMPRESSÃO ---
   const handlePrintList = (evento) => {
       const printWindow = window.open('', '', 'width=800,height=600');
       
@@ -157,8 +157,20 @@ const GerenciarEventos = () => {
       printWindow.document.close();
   };
 
+  // --- FUNÇÃO AUXILIAR PARA FORMATAR DATA ---
+  const formatarData = (dataISO) => {
+    if (!dataISO) return '';
+    return new Date(dataISO).toLocaleString('pt-BR', {
+      day: '2-digit', month: '2-digit', year: 'numeric', 
+      hour: '2-digit', minute: '2-digit'
+    });
+  };
+
   return (
     <div className="app-container">
+      {/* LOADING FORA DO CONTAINER PRINCIPAL */}
+      {loading && <Loading />}
+      
       <header className="cadastro-header">
         <img src={brasao} alt="Brasão" className="header-brasao" />
         <div className="header-divider" />
@@ -170,7 +182,8 @@ const GerenciarEventos = () => {
 
       <div className="cadastro-form-container" style={{ maxWidth: '1000px', width: '95%' }}>
         
-        {view === 'lista' && (
+        {/* Só renderiza o conteúdo se NÃO estiver carregando */}
+        {!loading && view === 'lista' && (
             <>
                 <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px'}}>
                     <h1 className="cadastro-title" style={{margin: 0}}>Gerenciar Eventos</h1>
@@ -181,7 +194,7 @@ const GerenciarEventos = () => {
                 </div>
 
                 <div style={{display: 'flex', flexDirection: 'column', gap: '15px'}}>
-                    {loading ? <p style={{color: '#fff', textAlign: 'center'}}>if (loading) return <Loading /></p> : eventos.length === 0 ? <p style={{color: '#ccc', textAlign: 'center'}}>Nenhum evento cadastrado.</p> : eventos.map(evento => (
+                    {eventos.length === 0 ? <p style={{color: '#ccc', textAlign: 'center'}}>Nenhum evento cadastrado.</p> : eventos.map(evento => (
                         <div key={evento.id} style={{background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '10px', borderLeft: '5px solid #FEBF00', display: 'flex', flexDirection: 'column', gap: '10px'}}>
                             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px'}}>
                                 <div>
@@ -190,16 +203,15 @@ const GerenciarEventos = () => {
                                     <span style={{color: '#ccc', fontSize: '0.9rem'}}>Resp: {evento.responsavel}</span>
                                 </div>
                                 <div>
-                                    {/* BOTÃO IMPRIMIR */}
                                     <button onClick={() => handlePrintList(evento)} style={{cursor: 'pointer', marginRight: '15px', background: '#fff', border: 'none', color: '#333', padding: '5px 10px', borderRadius: '4px', fontWeight: 'bold'}}>🖨️ Lista de Presença</button>
-                                    
                                     <button onClick={() => handleEdit(evento)} style={{cursor: 'pointer', marginRight: '15px', background: '#FEBF00', border: 'none', color: '#5c0017', padding: '5px 10px', borderRadius: '4px', fontWeight: 'bold'}}>Editar</button>
                                     <button onClick={() => handleDelete(evento.id)} style={{cursor: 'pointer', background: '#ef5350', border: 'none', color: '#fff', padding: '5px 10px', borderRadius: '4px', fontWeight: 'bold'}}>Excluir</button>
                                 </div>
                             </div>
                             
                             <p style={{color: '#ccc', fontSize: '0.9rem', margin: 0}}>
-                                📅 {new Date(evento.data_inicio).toLocaleString()} 
+                                📅 {formatarData(evento.data_inicio)} 
+                                {evento.data_fim ? ` até ${formatarData(evento.data_fim)}` : ''}
                                 {evento.local && ` | 📍 ${evento.local}`} 
                             </p>
 
@@ -219,7 +231,7 @@ const GerenciarEventos = () => {
             </>
         )}
 
-        {view === 'formulario' && (
+        {!loading && view === 'formulario' && (
             <div style={{animation: 'fadeIn 0.3s ease'}}>
                 <h2 style={{color: '#FEBF00', borderBottom: '1px solid #555', paddingBottom: '10px', marginBottom: '20px'}}>
                     {formData.id ? 'Editar Evento' : 'Criar Novo Evento'}

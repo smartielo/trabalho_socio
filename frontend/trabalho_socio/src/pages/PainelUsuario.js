@@ -1,11 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../styles/dashboard.css'; 
+import Loading from '../components/Loading'; // Importa o Loading
+import '../styles/dashboard.css';
 import '../styles/cadastro.css';
-
-
-
-import Loading from '../components/Loading';
 
 const PainelUsuario = () => {
   const navigate = useNavigate();
@@ -89,16 +86,8 @@ const PainelUsuario = () => {
     }
   };
 
-  // Função para formatar data de forma bonita
-  const formatarData = (dataISO) => {
-    if (!dataISO) return '';
-    return new Date(dataISO).toLocaleString('pt-BR', {
-      day: '2-digit', month: '2-digit', year: 'numeric', 
-      hour: '2-digit', minute: '2-digit'
-    });
-  };
-
-  if (loading) return <div className="dashboard-container"><h2 style={{color: '#fff'}}>if (loading) return <Loading /></h2></div>;
+  // --- USO DO LOADING AQUI ---
+  if (loading) return <Loading />;
 
   return (
     <div className="dashboard-container">
@@ -152,20 +141,17 @@ const PainelUsuario = () => {
                             <div style={{ padding: '15px', flex: 1, display: 'flex', flexDirection: 'column' }}>
                                 <h3 style={{ color: '#FEBF00', margin: '0 0 10px 0' }}>{evento.titulo}</h3>
                                 
-                                {/* --- DATA ATUALIZADA --- */}
                                 <p style={{ color: '#fff', fontSize: '0.9rem', marginBottom: '5px' }}>
-                                    <strong>Data:</strong> {formatarData(evento.data_inicio)} 
-                                    {evento.data_fim ? ` até ${formatarData(evento.data_fim)}` : ''}
+                                    <strong>Data:</strong> {new Date(evento.data_inicio).toLocaleDateString()} às {new Date(evento.data_inicio).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                                 </p>
-
-                                {/* --- LOCAL (ADICIONADO) --- */}
+                                
                                 {evento.local && (
                                     <p style={{ color: '#fff', fontSize: '0.9rem', marginBottom: '5px' }}>
                                         <strong>Local:</strong> {evento.local}
                                     </p>
                                 )}
 
-                                <p style={{ color: '#ccc', fontSize: '0.9rem', marginBottom: '15px', flex: 1, whiteSpace: 'pre-wrap' }}>
+                                <p style={{ color: '#ccc', fontSize: '0.9rem', marginBottom: '15px', flex: 1 }}>
                                     {evento.descricao}
                                 </p>
                                 
