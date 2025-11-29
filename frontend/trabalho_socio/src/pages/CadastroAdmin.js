@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import InputMask from 'react-input-mask';
+import { toast } from 'react-toastify'; // Importa o toast
 
 import '../styles/cadastro.css'; 
 import brasao from '../assets/brasao.png';
@@ -15,14 +16,9 @@ const CadastroAdmin = () => {
     senha: '',
     confirmarSenha: '',
   });
-  const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    // A proteção de rota agora é feita pelo App.js (ProtectedRoute)
-    // Não precisamos mais verificar location.state
-    
     document.body.classList.add('cadastro-page-active');
-    document.title = 'C.S.E. - Irmã Adelaide | Cadastrar Administrador';
     return () => {
       document.body.classList.remove('cadastro-page-active');
     };
@@ -33,47 +29,41 @@ const CadastroAdmin = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.nome) newErrors.nome = 'O nome é obrigatório.';
-    if (!formData.cpf) newErrors.cpf = 'O CPF é obrigatório.';
-    if (!formData.senha) {
-      newErrors.senha = 'A senha é obrigatória.';
-    } else if (formData.senha.length < 8) {
-      newErrors.senha = 'A senha deve ter no mínimo 8 caracteres.';
-    }
-    if (formData.senha !== formData.confirmarSenha) {
-      newErrors.confirmarSenha = 'As senhas não coincidem.';
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:5000/api/admin/cadastro', {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(formData),
-        });
 
-        if (response.ok) {
-          alert('Administrador cadastrado com sucesso!');
-          // Redireciona para a lista de usuários em vez do dashboard
-          navigate('/gerenciar-usuarios'); 
-        } else {
-          const errorData = await response.json();
-          setErrors(prev => ({ ...prev, api: errorData.message || 'Erro ao cadastrar.' }));
-        }
-      } catch (err) {
-        setErrors(prev => ({ ...prev, api: 'Não foi possível conectar ao servidor.' }));
+    // Validações manuais simples
+    if (!formData.nome || !formData.cpf || !formData.senha) {
+        return toast.warn("Preencha todos os campos obrigatórios.");
+    }
+    if (formData.senha.length < 4) { // Senha curta para teste, ideal ser maior
+        return toast.warn("A senha deve ter pelo menos 4 caracteres.");
+    }
+    if (formData.senha !== formData.confirmarSenha) {
+        return toast.error("As senhas não coincidem.");
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/admin/cadastro', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('Administrador cadastrado com sucesso!');
+        navigate('/gerenciar-usuarios'); // Volta para a lista de usuários
+      } else {
+        toast.error(data.msg || 'Erro ao cadastrar.');
       }
+    } catch (err) {
+      toast.error('Não foi possível conectar ao servidor.');
     }
   };
 
@@ -90,43 +80,33 @@ const CadastroAdmin = () => {
 
       <div className="cadastro-form-container" style={{ maxWidth: '600px' }}>
         <h1 className="cadastro-title">Cadastrar Novo Administrador</h1>
+        
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="nome" className="cadastro-label">Nome Completo</label>
-            <input type="text" id="nome" name="nome" className={`input ${errors.nome ? 'error' : ''}`} placeholder="Digite o nome completo" value={formData.nome} onChange={handleChange} />
-            {errors.nome && <p className="error-message">{errors.nome}</p>}
+            <input type="text" id="nome" name="nome" className="input" placeholder="Digite o nome completo" value={formData.nome} onChange={handleChange} />
           </div>
 
           <div className="form-group">
             <label htmlFor="cpf" className="cadastro-label">CPF</label>
-            <InputMask mask="999.999.999-99" maskChar={null} id="cpf" name="cpf" className={`input ${errors.cpf ? 'error' : ''}`} placeholder="Digite o CPF" value={formData.cpf} onChange={handleChange} />
-            {errors.cpf && <p className="error-message">{errors.cpf}</p>}
+            <InputMask mask="999.999.999-99" maskChar={null} id="cpf" name="cpf" className="input" placeholder="Digite o CPF" value={formData.cpf} onChange={handleChange} />
           </div>
 
           <div className="form-group">
             <label htmlFor="senha" className="cadastro-label">Senha</label>
-            <input type="password" id="senha" name="senha" className={`input ${errors.senha ? 'error' : ''}`} placeholder="Mínimo de 8 caracteres" value={formData.senha} onChange={handleChange} />
-            {errors.senha && <p className="error-message">{errors.senha}</p>}
+            <input type="password" id="senha" name="senha" className="input" placeholder="Mínimo de 4 caracteres" value={formData.senha} onChange={handleChange} />
           </div>
 
           <div className="form-group">
             <label htmlFor="confirmarSenha" className="cadastro-label">Confirmar Senha</label>
-            <input type="password" id="confirmarSenha" name="confirmarSenha" className={`input ${errors.confirmarSenha ? 'error' : ''}`} placeholder="Redigite a senha" value={formData.confirmarSenha} onChange={handleChange} />
-            {errors.confirmarSenha && <p className="error-message">{errors.confirmarSenha}</p>}
+            <input type="password" id="confirmarSenha" name="confirmarSenha" className="input" placeholder="Redigite a senha" value={formData.confirmarSenha} onChange={handleChange} />
           </div>
 
-          {errors.api && <p className="error-message">{errors.api}</p>}
-
-          <div className="navigation-buttons" style={{ justifyContent: 'center', marginTop: '2rem' }}>
-            <button type="submit" className="submit-button">Concluir Cadastro</button>
+          <div className="navigation-buttons" style={{ justifyContent: 'center', marginTop: '2rem', gap: '15px' }}>
+            <button type="button" className="submit-button cancel-button" onClick={() => navigate('/gerenciar-usuarios')}>Cancelar</button>
+            <button type="submit" className="submit-button">Cadastrar Admin</button>
           </div>
         </form>
-      </div>
-
-      <div className="back-button-container">
-        <button className="back-button" onClick={() => navigate('/gerenciar-usuarios')}>
-          Voltar
-        </button>
       </div>
     </div>
   );

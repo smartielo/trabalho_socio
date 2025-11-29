@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
-import '../styles/cadastro.css'; // Reutiliza estilos de formulário
-import '../styles/GerenciarUsuarios.css'; // Estilos específicos para esta página
+import '../styles/cadastro.css'; 
+import '../styles/GerenciarUsuarios.css'; 
 
 import brasao from '../assets/brasao.png';
 import instituto from '../assets/instituto.png';
@@ -10,73 +11,69 @@ import sagrado from '../assets/Sagrado.png';
 
 const GerenciarUsuarios = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [users, setUsers] = useState([]);
+  const [resetRequests, setResetRequests] = useState([]); 
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
-  useEffect(() => {
-    const fetchUsers = async () => {
+  const fetchAll = async () => {
       const token = localStorage.getItem('token');
-      if (!location.state?.fromDashboard || !token) {
-        navigate('/dashboard');
-        return;
-      }
-
       try {
-        const response = await fetch('http://localhost:5000/api/admin/users', {
+        const resUsers = await fetch('http://localhost:5000/api/admin/users', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
+        if (resUsers.ok) setUsers(await resUsers.json());
 
-        if (response.ok) {
-          const data = await response.json();
-          setUsers(data);
-        } else {
-          setError('Falha ao carregar a lista de usuários.');
-        }
+        const resRequests = await fetch('http://localhost:5000/api/admin/reset-requests', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (resRequests.ok) setResetRequests(await resRequests.json());
+
       } catch (err) {
-        setError('Não foi possível conectar ao servidor.');
+        toast.error("Erro ao carregar dados.");
       } finally {
         setLoading(false);
       }
-    };
+  };
 
-    fetchUsers();
-
-    // Proteção de rota para garantir que o acesso venha do dashboard
-    if (!location.state?.fromDashboard) {
-      navigate('/dashboard');
-      return;
-    }
-
+  useEffect(() => {
     document.body.classList.add('cadastro-page-active');
-    document.title = 'C.S.E. - Irmã Adelaide | Gerenciar Usuários';
-    return () => {
-      document.body.classList.remove('cadastro-page-active');
-    };
-  }, [location.state, navigate]);
+    fetchAll();
+    return () => document.body.classList.remove('cadastro-page-active');
+  }, []);
 
   const handleRemoveUser = async (userId) => {
-    // Janela de confirmação para segurança
-    if (window.confirm('Tem certeza que deseja remover este usuário? Esta ação não pode ser desfeita.')) {
+    if (window.confirm('Remover este usuário?')) {
       const token = localStorage.getItem('token');
       try {
         const response = await fetch(`http://localhost:5000/api/admin/users/${userId}`, { 
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}` }
         });
-
         if (response.ok) {
-          alert('Usuário removido com sucesso!');
-          // Remove o usuário da lista localmente para atualizar a UI
-          setUsers(currentUsers => currentUsers.filter(user => user.id !== userId));
-        } else {
-          alert('Falha ao remover o usuário.');
+          toast.success('Usuário removido!');
+          setUsers(prev => prev.filter(u => u.id !== userId));
         }
-      } catch (err) {
-        alert('Erro de conexão com o servidor.');
-      }
+      } catch (err) { toast.error('Erro na conexão.'); }
     }
+  };
+
+  const handleResetAction = async (id, acao) => {
+      const token = localStorage.getItem('token');
+      try {
+          const response = await fetch(`http://localhost:5000/api/admin/reset-requests/${id}/acao`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+              body: JSON.stringify({ acao })
+          });
+          
+          const data = await response.json();
+          if (response.ok) {
+              toast.success(data.msg);
+              setResetRequests(prev => prev.filter(r => r.id !== id));
+          } else {
+              toast.error(data.msg);
+          }
+      } catch (err) { toast.error('Erro na conexão.'); }
   };
 
   return (
@@ -91,35 +88,50 @@ const GerenciarUsuarios = () => {
       </header>
 
       <div className="gerenciar-container">
-        <h1 className="cadastro-title">Gerenciar Usuários</h1>
+        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+            <h1 className="cadastro-title" style={{margin:0}}>Gerenciar Usuários</h1>
+            <button onClick={()=>navigate('/cadastro-admin')} className="submit-button" style={{padding:'8px 15px', marginTop:0}}>+ Novo Admin</button>
+        </div>
 
-        {loading && <p style={{ color: 'white', textAlign: 'center' }}>Carregando usuários...</p>}
-        {error && <p className="error-message" style={{ textAlign: 'center' }}>{error}</p>}
+        {/* SEÇÃO DE PEDIDOS DE RESET */}
+        {resetRequests.length > 0 && (
+            <div style={{marginBottom: '2rem', border:'2px solid #FEBF00', padding:'15px', borderRadius:'10px', background:'rgba(0,0,0,0.3)'}}>
+                <h3 style={{color:'#FEBF00', marginTop:0}}>🔔 Solicitações de Recuperação de Senha</h3>
+                {resetRequests.map(req => (
+                    <div key={req.id} style={{display:'flex', justifyContent:'space-between', alignItems:'center', background:'rgba(255,255,255,0.05)', padding:'10px', marginBottom:'5px', borderRadius:'5px'}}>
+                        <div>
+                            <strong style={{color:'#fff'}}>{req.usuario_nome}</strong>
+                            <div style={{color:'#ccc', fontSize:'0.9rem'}}>CPF: {req.usuario_cpf} | Data: {req.data}</div>
+                        </div>
+                        <div style={{display:'flex', gap:'5px'}}>
+                            <button onClick={() => handleResetAction(req.id, 'aprovar')} style={{background:'#28a745', border:'none', color:'#fff', padding:'5px 10px', borderRadius:'5px', cursor:'pointer'}}>Resetar para 'mudar123'</button>
+                            <button onClick={() => handleResetAction(req.id, 'rejeitar')} style={{background:'#dc3545', border:'none', color:'#fff', padding:'5px 10px', borderRadius:'5px', cursor:'pointer'}}>Rejeitar</button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        )}
+
+        {loading && <p style={{ color: 'white', textAlign: 'center' }}>Carregando...</p>}
 
         <div className="user-list">
-          {users.length > 0 ? (
-            users.map(user => {
-              // Define a classe com base no tipo de usuário para estilização
-              const roleClass = user.tipo.includes('Master') 
-                ? 'master' 
-                : user.tipo.includes('Admin') 
-                ? 'admin' 
-                : 'comum';
-
+          {users.map(user => {
+              // CORREÇÃO DE SEGURANÇA AQUI:
+              const tipo = user.tipo || ''; // Garante que seja uma string, mesmo se vier vazio
+              const roleClass = tipo.includes('Master') ? 'master' : tipo.includes('Admin') ? 'admin' : 'comum';
+              
               return (
               <div key={user.id} className={`user-card ${roleClass}`}>
                 <div className="user-info">
                   <span className="user-name">{user.nome}</span>
                   <span className="user-cpf">CPF: {user.cpf}</span>
-                  <span className={`user-role ${roleClass}`}>{user.tipo}</span>
+                  <span className={`user-role ${roleClass}`}>{tipo}</span>
                 </div>
                 <div className="user-actions">
                   <button 
                     className="remove-user-btn"
                     onClick={() => handleRemoveUser(user.id)}
-                    // Desabilita a remoção do admin master para segurança
-                    disabled={user.tipo.includes('Master')}
-                    title={user.tipo.includes('Master') ? 'Não é possível remover o administrador principal' : 'Remover usuário'}
+                    disabled={tipo.includes('Master')}
                   >
                     Remover
                   </button>
@@ -127,16 +139,12 @@ const GerenciarUsuarios = () => {
               </div>
               );
             })
-          ) : (
-            <p className="empty-list-message">Nenhum usuário para gerenciar.</p>
-          )}
+          }
         </div>
       </div>
 
       <div className="back-button-container">
-        <button className="back-button" onClick={() => navigate('/dashboard')}>
-          Voltar ao Dashboard
-        </button>
+        <button className="back-button" onClick={() => navigate('/dashboard')}>Voltar ao Dashboard</button>
       </div>
     </div>
   );

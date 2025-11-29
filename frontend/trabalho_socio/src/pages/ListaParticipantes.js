@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import '../styles/cadastro.css';
 import '../styles/dashboard.css';
 import brasao from '../assets/brasao.png';
@@ -8,11 +9,9 @@ import sagrado from '../assets/Sagrado.png';
 
 const ListaParticipantes = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const initialSearch = searchParams.get('q') || '';
-
   const [participantes, setParticipantes] = useState([]);
-  const [filtro, setFiltro] = useState(initialSearch);
+  const [filtroTexto, setFiltroTexto] = useState('');
+  const [filtroStatus, setFiltroStatus] = useState('todos'); // Novo Estado
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,21 +19,15 @@ const ListaParticipantes = () => {
     
     const fetchTodos = async () => {
       const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
       try {
         const response = await fetch('http://localhost:5000/api/participantes/todos', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (response.ok) {
-          const data = await response.json();
-          setParticipantes(data);
+          setParticipantes(await response.json());
         }
       } catch (error) {
-        console.error("Erro ao buscar lista:", error);
+        toast.error("Erro ao buscar lista.");
       } finally {
         setLoading(false);
       }
@@ -42,38 +35,35 @@ const ListaParticipantes = () => {
 
     fetchTodos();
     return () => document.body.classList.remove('cadastro-page-active');
-  }, [navigate]);
+  }, []);
 
   const handleStatusChange = async (id, novoStatus) => {
     const token = localStorage.getItem('token');
     try {
       const response = await fetch(`http://localhost:5000/api/admin/participantes/${id}/status`, {
         method: 'PUT',
-        headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` 
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ status: novoStatus })
       });
 
       if (response.ok) {
-        alert(`Participante ${novoStatus} com sucesso!`);
-        setParticipantes(prev => prev.map(p => 
-            p.id === id ? { ...p, status: novoStatus } : p
-        ));
+        toast.success(`Status atualizado para ${novoStatus}!`);
+        setParticipantes(prev => prev.map(p => p.id === id ? { ...p, status: novoStatus } : p));
       } else {
-        alert("Erro ao atualizar status.");
+        toast.error("Erro ao atualizar status.");
       }
-    } catch (error) {
-      console.error(error);
-    }
+    } catch (error) { console.error(error); }
   };
 
+  // Lógica de Filtro Avançada
   const participantesFiltrados = participantes.filter(p => {
-    const termo = filtro.toLowerCase();
-    const nomeMatch = p.nomeCompleto && p.nomeCompleto.toLowerCase().includes(termo);
-    const cpfMatch = p.cpf && p.cpf.includes(termo);
-    return nomeMatch || cpfMatch;
+    const termo = filtroTexto.toLowerCase();
+    const matchTexto = (p.nomeCompleto && p.nomeCompleto.toLowerCase().includes(termo)) || 
+                       (p.cpf && p.cpf.includes(termo));
+    
+    const matchStatus = filtroStatus === 'todos' ? true : p.status === filtroStatus;
+
+    return matchTexto && matchStatus;
   });
 
   return (
@@ -90,21 +80,34 @@ const ListaParticipantes = () => {
       <div className="cadastro-form-container" style={{ maxWidth: '1000px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <h1 className="cadastro-title" style={{ margin: 0 }}>Lista de Matrículas</h1>
-            {/* Botão Superior (já existia, mantido) */}
-            <button onClick={() => navigate('/dashboard')} className="submit-button" style={{ padding: '8px 20px', fontSize: '0.9rem' }}>
-                Voltar
-            </button>
+            <button onClick={() => navigate('/dashboard')} className="submit-button" style={{ padding: '8px 20px', fontSize: '0.9rem' }}>Voltar</button>
         </div>
 
-        <div className="form-group">
-            <input 
-                type="text" 
-                className="input" 
-                placeholder="Filtrar por Nome ou CPF..." 
-                value={filtro}
-                onChange={(e) => setFiltro(e.target.value)}
-                style={{ backgroundColor: '#fff', color: '#333' }}
-            />
+        {/* FILTROS */}
+        <div className="form-group-row" style={{ marginBottom: '20px' }}>
+            <div className="form-group" style={{ flex: 3 }}>
+                <input 
+                    type="text" 
+                    className="input" 
+                    placeholder="Buscar por Nome ou CPF..." 
+                    value={filtroTexto}
+                    onChange={(e) => setFiltroTexto(e.target.value)}
+                    style={{ backgroundColor: '#fff', color: '#333' }}
+                />
+            </div>
+            <div className="form-group" style={{ flex: 1 }}>
+                <select 
+                    className="input" 
+                    value={filtroStatus} 
+                    onChange={(e) => setFiltroStatus(e.target.value)}
+                    style={{ backgroundColor: '#fff', color: '#333' }}
+                >
+                    <option value="todos">Todos os Status</option>
+                    <option value="pendente">Pendentes</option>
+                    <option value="aprovado">Aprovados</option>
+                    <option value="reprovado">Reprovados</option>
+                </select>
+            </div>
         </div>
 
         <div style={{ backgroundColor: 'rgba(0,0,0,0.3)', borderRadius: '10px', padding: '15px', maxHeight: '60vh', overflowY: 'auto' }}>
@@ -134,16 +137,9 @@ const ListaParticipantes = () => {
                                 </td>
                                 <td style={{ padding: '10px' }}>{p.cpf}</td>
                                 <td style={{ padding: '10px', display: 'flex', gap: '5px' }}>
-                                    <button onClick={() => navigate(`/perfil/${p.id}`)} style={{ background: '#42a5f5', color: '#fff', border: 'none', borderRadius: '5px', padding: '5px 10px', cursor: 'pointer' }}>
-                                        Ver
-                                    </button>
-                                    {/* Botões de ação rápida */}
-                                    <button onClick={() => handleStatusChange(p.id, 'aprovado')} style={{ background: '#66bb6a', color: '#fff', border: 'none', borderRadius: '5px', padding: '5px 10px', cursor: 'pointer' }} title="Aprovar">
-                                        ✓
-                                    </button>
-                                    <button onClick={() => handleStatusChange(p.id, 'reprovado')} style={{ background: '#ef5350', color: '#fff', border: 'none', borderRadius: '5px', padding: '5px 10px', cursor: 'pointer' }} title="Reprovar">
-                                        ✕
-                                    </button>
+                                    <button onClick={() => navigate(`/perfil/${p.id}`)} style={{ background: '#42a5f5', color: '#fff', border: 'none', borderRadius: '5px', padding: '5px 10px', cursor: 'pointer' }}>Ver</button>
+                                    <button onClick={() => handleStatusChange(p.id, 'aprovado')} style={{ background: '#66bb6a', color: '#fff', border: 'none', borderRadius: '5px', padding: '5px 10px', cursor: 'pointer' }} title="Aprovar">✓</button>
+                                    <button onClick={() => handleStatusChange(p.id, 'reprovado')} style={{ background: '#ef5350', color: '#fff', border: 'none', borderRadius: '5px', padding: '5px 10px', cursor: 'pointer' }} title="Reprovar">✕</button>
                                 </td>
                             </tr>
                         ))}
@@ -155,16 +151,8 @@ const ListaParticipantes = () => {
         </div>
         
         <div style={{ marginTop: '10px', color: '#ccc', fontSize: '0.9rem', textAlign: 'right' }}>
-            Total encontrado: {participantesFiltrados.length}
+            Total: {participantesFiltrados.length}
         </div>
-
-        {/* --- NOVO BOTÃO INFERIOR --- */}
-        <div className="back-button-container" style={{ marginTop: '20px', paddingBottom: '0' }}>
-            <button className="back-button" onClick={() => navigate('/dashboard')}>
-                Voltar ao Dashboard
-            </button>
-        </div>
-
       </div>
     </div>
   );

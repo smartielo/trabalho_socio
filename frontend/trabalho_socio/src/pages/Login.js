@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import InputMask from 'react-input-mask'; 
+import { toast } from 'react-toastify';
 
 import '../styles/Login.css';
 import '../styles/cadastro.css';
@@ -11,20 +12,19 @@ import sagrado from '../assets/Sagrado.png';
 
 const Login = () => {
   const navigate = useNavigate();
-  
-  // Estado para controlar se é login de Admin ou Usuário Comum
   const [isAdminMode, setIsAdminMode] = useState(false);
-  
   const [cpf, setCpf] = useState('');
   const [senha, setSenha] = useState('');
-  const [error, setError] = useState('');
+  
+  // Modal de Reset
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetCpf, setResetCpf] = useState('');
 
   useEffect(() => {
     document.body.classList.add('cadastro-page-active');
-    // Muda o título da aba dependendo do modo
     document.title = isAdminMode 
-        ? 'C.S.E. - Irmã Adelaide | Login Administrativo' 
-        : 'C.S.E. - Irmã Adelaide | Login Participante';
+        ? 'C.S.E. - Login Administrativo' 
+        : 'C.S.E. - Login Participante';
 
     return () => {
       document.body.classList.remove('cadastro-page-active');
@@ -33,10 +33,9 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
 
     if (!cpf || !senha) {
-      setError('Por favor, preencha o CPF e a senha.');
+      toast.warn('Por favor, preencha CPF e senha.');
       return;
     }
 
@@ -50,19 +49,17 @@ const Login = () => {
       if (response.ok) {
         const data = await response.json();
 
-        // --- NOVA VALIDAÇÃO DE SEGURANÇA ---
-        // Se estiver no modo Admin, mas o usuário for 'comum', BLOQUEIA.
         if (isAdminMode && data.tipo === 'comum') {
-            setError('Acesso negado. Esta área é exclusiva para administradores.');
-            return; // Não salva o token e não loga
+            toast.error('Acesso negado. Área exclusiva para administradores.');
+            return;
         }
-        // -----------------------------------
         
         localStorage.setItem('token', data.access_token);
         localStorage.setItem('userType', data.tipo); 
         localStorage.setItem('userName', data.nome);
 
-        // Redirecionamento
+        toast.success(`Bem-vindo(a), ${data.nome}!`);
+
         if (data.tipo === 'Master' || data.tipo === 'Admin') {
             navigate('/dashboard');
         } else {
@@ -70,12 +67,34 @@ const Login = () => {
         }
         
       } else {
-        const data = await response.json();
-        setError(data.message || 'CPF ou senha inválidos.');
+        toast.error('CPF ou senha inválidos.');
       }
     } catch (err) {
-      setError('Falha ao conectar com o servidor. Tente novamente.');
+      toast.error('Falha na conexão com o servidor.');
     }
+  };
+
+  const handleResetRequest = async () => {
+      if (!resetCpf) return toast.warn("Digite seu CPF para recuperar a senha.");
+      
+      try {
+          const response = await fetch('http://localhost:5000/api/reset-password-request', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ cpf: resetCpf })
+          });
+          
+          const data = await response.json();
+          if (response.ok) {
+              toast.success(data.msg);
+              setShowResetModal(false);
+              setResetCpf('');
+          } else {
+              toast.error(data.msg);
+          }
+      } catch (error) {
+          toast.error("Erro ao solicitar recuperação.");
+      }
   };
 
   return (
@@ -90,8 +109,7 @@ const Login = () => {
       </header>
 
       <div className="login-form-container" style={{ 
-          border: isAdminMode ? '2px solid #FEBF00' : '1px solid rgba(255,255,255,0.18)', // Destaque dourado no admin
-          transition: 'all 0.3s ease'
+          border: isAdminMode ? '2px solid #FEBF00' : '1px solid rgba(255,255,255,0.18)'
       }}>
         
         <h1 className="cadastro-title" style={{ color: isAdminMode ? '#FEBF00' : '#fff' }}>
@@ -100,12 +118,10 @@ const Login = () => {
 
         <form onSubmit={handleLogin}>
           <div className="form-group">
-            <label htmlFor="cpf" className="cadastro-label">CPF</label>
+            <label className="cadastro-label">CPF</label>
             <InputMask 
                 mask="999.999.999-99" 
                 maskChar={null}
-                id="cpf" 
-                name="cpf" 
                 className="input" 
                 placeholder="Digite seu CPF" 
                 value={cpf} 
@@ -113,11 +129,9 @@ const Login = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="senha" className="cadastro-label">Senha</label>
+            <label className="cadastro-label">Senha</label>
             <input 
                 type="password" 
-                id="senha" 
-                name="senha" 
                 className="input" 
                 placeholder="Digite sua senha" 
                 value={senha} 
@@ -125,10 +139,8 @@ const Login = () => {
             />
           </div>
           
-          {error && <p className="error-message" style={{textAlign: 'center', fontWeight: 'bold'}}>{error}</p>}
-          
           <button type="submit" className="submit-button login-button" style={{
-              backgroundColor: isAdminMode ? '#FEBF00' : '#28a745', // Botão muda de cor
+              backgroundColor: isAdminMode ? '#FEBF00' : '#28a745',
               color: isAdminMode ? '#5c0017' : '#fff',
               borderColor: isAdminMode ? '#FEBF00' : '#28a745'
           }}>
@@ -136,43 +148,57 @@ const Login = () => {
           </button>
         </form>
 
-        {/* Links de Rodapé do Card */}
-        <div style={{ marginTop: '25px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ marginTop: '20px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             
+            <button onClick={() => setShowResetModal(true)} style={{background:'none', border:'none', color:'#ccc', textDecoration:'underline', cursor:'pointer'}}>
+                Esqueci minha senha
+            </button>
+
             {!isAdminMode && (
                 <span className="signup-link">
                     Não tem uma conta? <Link to="/cadastro">Cadastre-se</Link>
                 </span>
             )}
 
-            {/* --- BOTÃO DE TROCA DE MODO --- */}
             <button 
                 onClick={() => {
                     setIsAdminMode(!isAdminMode);
-                    setError(''); // Limpa erros ao trocar
-                    setCpf('');
-                    setSenha('');
+                    setCpf(''); setSenha('');
                 }}
                 style={{
-                    background: 'none',
-                    border: 'none',
-                    color: isAdminMode ? '#fff' : '#FEBF00', // Cor inversa ao título
-                    textDecoration: 'underline',
-                    cursor: 'pointer',
-                    fontSize: '0.9rem',
-                    marginTop: '10px'
+                    background: 'none', border: 'none',
+                    color: isAdminMode ? '#fff' : '#FEBF00',
+                    textDecoration: 'underline', cursor: 'pointer', fontSize: '0.9rem', marginTop: '10px'
                 }}
             >
                 {isAdminMode ? '← Voltar para Área do Participante' : 'Sou Coordenador / Administrador'}
             </button>
         </div>
-
       </div>
 
+      {/* MODAL RESET SENHA */}
+      {showResetModal && (
+          <div style={{position:'fixed', top:0, left:0, width:'100%', height:'100%', background:'rgba(0,0,0,0.8)', display:'flex', justifyContent:'center', alignItems:'center', zIndex:1000}}>
+              <div style={{background:'#1b263b', padding:'30px', borderRadius:'10px', width:'90%', maxWidth:'400px', border:'1px solid #FEBF00'}}>
+                  <h3 style={{color:'#fff', marginTop:0}}>Recuperar Senha</h3>
+                  <p style={{color:'#ccc'}}>Informe seu CPF para solicitar o reset de senha ao administrador.</p>
+                  <InputMask 
+                    mask="999.999.999-99" 
+                    className="input" 
+                    placeholder="Seu CPF" 
+                    value={resetCpf} 
+                    onChange={(e) => setResetCpf(e.target.value)} 
+                  />
+                  <div style={{display:'flex', gap:'10px', marginTop:'20px'}}>
+                      <button onClick={handleResetRequest} className="submit-button" style={{flex:1}}>Solicitar</button>
+                      <button onClick={() => setShowResetModal(false)} className="submit-button" style={{flex:1, background:'#dc3545', borderColor:'#dc3545'}}>Cancelar</button>
+                  </div>
+              </div>
+          </div>
+      )}
+
       <div className="back-button-container">
-        <button className="back-button" onClick={() => navigate('/')}>
-          Voltar ao Início
-        </button>
+        <button className="back-button" onClick={() => navigate('/')}>Voltar ao Início</button>
       </div>
     </div>
   );

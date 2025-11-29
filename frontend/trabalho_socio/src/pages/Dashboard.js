@@ -178,6 +178,11 @@ const PageDashboard = () => {
                 📊 Baixar Planilha
             </button>
 
+            {/* BOTÃO GERENCIAR USUÁRIOS (NOVO) */}
+            <button onClick={() => navigate('/gerenciar-usuarios')} className="submit-button" style={{ padding: '10px 15px', fontSize: '0.9rem', backgroundColor: '#ff9800', borderColor: '#ff9800' }}>
+                👥 Usuários
+            </button>
+
             <Link to="/cadastro" className="submit-button" style={{ textDecoration: 'none', textAlign: 'center', padding: '10px 15px', fontSize: '0.9rem' }}>
                 + Nova Matrícula
             </Link>
@@ -232,7 +237,7 @@ const PageDashboard = () => {
           <ul>
             {dashboardData.recentRegistrations.map(item => (
               <li key={item.id} className="list-item" style={{ display: 'flex', alignItems: 'center' }}>
-                {/* ALINHAMENTO CORRIGIDO AQUI: */}
+                {/* ALINHAMENTO MANTIDO DA CORREÇÃO ANTERIOR */}
                 <strong style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: '10px' }}>
                     {item.name}
                 </strong>
